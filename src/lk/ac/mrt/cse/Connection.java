@@ -8,10 +8,18 @@ package lk.ac.mrt.cse;
 public class Connection {
     private String ip;
     private int port;
+    private int noOfConnections;
 
     public Connection(String ip, String port){
         this.ip = ip;
         this.port = Integer.parseInt(port);
+        this.noOfConnections = 0;
+    }
+
+    public Connection(String ip, String port , String noOfConnections){
+        this.ip = ip;
+        this.port = Integer.parseInt(port);
+        this.noOfConnections = Integer.parseInt(noOfConnections);
     }
 
     public String getIp() {
