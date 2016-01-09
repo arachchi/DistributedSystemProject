@@ -83,15 +83,21 @@ public class Client extends Thread {
 	
 		hops--;//should be handled in server side
         String packet = "";
-        if (fileList.contains(book)) {//this node has the book
-            String searchResults = "";//search results
-            int no_files = 0;//no of search results
-            for (String file : fileList) {
-                if (file.contains(book)) {
-                    searchResults += file + " ";
-                    no_files++;
-                }
+        boolean hasBook = false;//this node contains the file
+
+        String searchResults = "";//search results
+        int no_files = 0;//no of search results
+        for (String file : fileList) {
+            if (file.contains(book)) {
+                hasBook = true;
+                searchResults += file + " ";
+                no_files++;
             }
+        }
+
+
+        if (hasBook) {//this node has the book
+
             InetAddress IPAddress = null;
             try {
                 IPAddress = InetAddress.getByName("localhost");
