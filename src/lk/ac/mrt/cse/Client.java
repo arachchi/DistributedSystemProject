@@ -4,6 +4,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * @author nuran
@@ -14,9 +16,17 @@ public class Client extends Thread {
     int size=1024;
     int port=9878;
     int hops=5;
+	
+	ArrayList<String> fileList;
+    Hashtable<String, String> neighbourFileList;
+    ArrayList<Connection> connections;// Routing Table
 
     public Client(String port){
         this.port = Integer.parseInt(port);
+		
+		fileList = new ArrayList<String>();
+        connections = new ArrayList<Connection>();
+        neighbourFileList = new Hashtable<String, String>();
     }
 
 
@@ -70,6 +80,49 @@ public class Client extends Thread {
         }
     }
     public void search(String book){
+	
+		hops--;//should be handled in server side
+        String packet = "";
+        if (fileList.contains(book)) {//this node has the book
+            String searchResults = "";//search results
+            int no_files = 0;//no of search results
+            for (String file : fileList) {
+                if (file.contains(book)) {
+                    searchResults += file + " ";
+                    no_files++;
+                }
+            }
+            InetAddress IPAddress = null;
+            try {
+                IPAddress = InetAddress.getByName("localhost");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            packet = "SEARCHOK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + " " + searchResults;
+
+        } else if (neighbourFileList.containsKey(book)) {//neighbour nodes have the book
+            
+            String IP = neighbourFileList.get(book);
+            packet = "SEARCH " + book + " " + hops + " " + IP + " " + port;
+            
+        } else { //otherwise
+            if (hops > 1) {
+                //number of hops should be checked at the server side by reading search message request 
+                //and only forward to client if not expired
+                
+                //forward the message if not expired
+                for (Connection connection : connections) {
+                    String IP = connection.getIp(); //port = connection.getPort();
+                    packet = "SEARCH " + book + " " + hops + " " + IP + " " + port;
+                }
+                
+            }
+        }
+
+        sendRequest(packet);
+
+	
+		/*
         try {
             InetAddress IPAddress = InetAddress.getByName("localhost");
             String packet = "SEARCH " +book+ " "+hops+" "+IPAddress.getHostAddress() + " " + port;
@@ -77,5 +130,6 @@ public class Client extends Thread {
         }catch (Exception e){
             e.printStackTrace();
         }
+		*/
     }
 }
