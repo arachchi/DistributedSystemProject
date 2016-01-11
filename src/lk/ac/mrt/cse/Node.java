@@ -17,6 +17,8 @@ class Node implements Serializable {
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BSServerPort = 1026;
     private static String ip = "127.0.0.1";
+    private static  int size=1024;
+    private static int port=9878;
 
     public static void main(String args[]){
         String command;
@@ -32,6 +34,7 @@ class Node implements Serializable {
                 String port = scanner.next();
                 registration = registerToServer();
                 if(registration){
+                    Node.port=Integer.parseInt(port);
                     server = new Server(port);
                     client = new Client(port);
                     server.start();
@@ -39,6 +42,30 @@ class Node implements Serializable {
                     begin=false;
                 }
             }
+        }
+    }
+
+    public static void sendRequest(String packet){
+        try {
+            DatagramSocket clientSocket = new DatagramSocket();
+
+            InetAddress IPAddress = InetAddress.getByName("localhost");
+
+            byte[] sendData;
+            byte[] receiveData = new byte[size];
+
+            sendData = packet.getBytes();
+
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            clientSocket.send(sendPacket);
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            clientSocket.receive(receivePacket);
+            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            System.out.println("FROM SERVER:" + modifiedSentence);
+            clientSocket.close();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
