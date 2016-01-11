@@ -1,9 +1,13 @@
 package lk.ac.mrt.cse;
 
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * @author nuran
@@ -19,30 +23,6 @@ public class Client extends Thread {
         this.port = Integer.parseInt(port);
     }
 
-
-    public void sendRequest(String packet){
-        try {
-            DatagramSocket clientSocket = new DatagramSocket();
-
-            InetAddress IPAddress = InetAddress.getByName("localhost");
-
-            byte[] sendData;
-            byte[] receiveData = new byte[size];
-
-            sendData = packet.getBytes();
-
-            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-            clientSocket.send(sendPacket);
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            clientSocket.receive(receivePacket);
-            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
-
-            System.out.println("FROM SERVER:" + modifiedSentence);
-            clientSocket.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
     public void run(){
         Scanner scanner = new Scanner(System.in);
         String command,fileName;
@@ -64,18 +44,24 @@ public class Client extends Thread {
         try {
             InetAddress IPAddress = InetAddress.getByName("localhost");
             String packet = "INIT " + IPAddress.getHostAddress() + " " + port;
-            sendRequest(packet);
+            Node.sendRequest(packet);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
-    public void search(String book){
+    public void search(String keyword){
+
+        //Passes the search query to the local server, then the local server handles the query
+        InetAddress IPAddress = null;
         try {
-            InetAddress IPAddress = InetAddress.getByName("localhost");
-            String packet = "SEARCH " +book+ " "+hops+" "+IPAddress.getHostAddress() + " " + port;
-            sendRequest(packet);
-        }catch (Exception e){
+            IPAddress = InetAddress.getByName("localhost");
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+        String packet = "SEARCH " + keyword + " " + hops + " " + IPAddress + " " + port;
+
+        Node.sendRequest(packet);
     }
+
 }
