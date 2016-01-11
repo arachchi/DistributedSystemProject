@@ -12,13 +12,9 @@ import java.util.Scanner;
  */
 class Node implements Serializable {
 
-   // private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BSServerPort = 1026;
     private static String ip = "127.0.0.1";
     private static  int size=1024;
-   // private static int port=9878;
-
-
 
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BS_Port;
