@@ -1,7 +1,5 @@
 package lk.ac.mrt.cse;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -14,12 +12,24 @@ import java.util.Scanner;
  */
 class Node implements Serializable {
 
+<<<<<<< HEAD
+=======
+   // private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+    private static int BSServerPort = 1026;
+    private static String ip = "127.0.0.1";
+    private static  int size=1024;
+   // private static int port=9878;
+
+
+
+>>>>>>> upstream/master
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
 
     public static void main(String args[]){
+
         String command;
         Server server;
         Client client;
@@ -49,6 +59,30 @@ class Node implements Serializable {
                     begin=false;
                 }
             }
+        }
+    }
+
+    public static void sendRequest(String packet){
+        try {
+            DatagramSocket clientSocket = new DatagramSocket();
+
+            InetAddress IPAddress = InetAddress.getByName("localhost");
+
+            byte[] sendData;
+            byte[] receiveData = new byte[size];
+
+            sendData = packet.getBytes();
+
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
+            clientSocket.send(sendPacket);
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            clientSocket.receive(receivePacket);
+            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            System.out.println("FROM SERVER:" + modifiedSentence);
+            clientSocket.close();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

@@ -4,7 +4,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Set;
 //import java.util.Hashtable;
+
 /**
  * @author nuran
  * @version 1.0.
@@ -13,14 +16,15 @@ import java.util.ArrayList;
 public class Server extends Thread {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
-	//neighbourFileList = new Hashtable<String, String>();
-	
+    Hashtable<String, ArrayList<String>> neighbourFileList;
+
     int port=9878;
     final static int size=1024;
 
     public Server(){
         fileList = new ArrayList<String>();
         connections = new ArrayList<Connection>();
+        neighbourFileList = new Hashtable<String, ArrayList<String>>();
     }
 
     public Server(String port){
@@ -74,46 +78,102 @@ public class Server extends Thread {
         System.out.println("RECEIVED: " + query);
     }
 
-
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
         //search query runs here
 
-		
-        String book = message[1];
+        String keyword = message[1];
         int hops = Integer.parseInt(message[2])-1;
-        String IP = message[3];
+        String SearcherIPAddress = message[3];
         String port = message[4];
-              
-        hops--;
-        
-        /*
+
+        hops--;//should be handled in server side
         String packet = "";
-        if (fileList.contains(book)) {//this node has the book
-            String searchResults = "";//search results
-            int no_files = 0;//no of search results
+        boolean hasFile = false;//Flags whether this node contains the file
+        boolean fromLocalClient=false; //Flags if the request is from the local client
+        ArrayList<String> files=new ArrayList<String>();;
+
+        String searchResults = "";//search results
+        int no_files = 0;//no of search results
+
+        //Get IP of localhost
+        InetAddress IPAddress = null;
+        try {
+            IPAddress = InetAddress.getByName("localhost");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if(SearcherIPAddress.equals(IPAddress.toString())){
+            fromLocalClient=true;
+        }
+        if(!fromLocalClient){
             for (String file : fileList) {
-                if (file.contains(book)) {
-                    searchResults += file + " ";
+                //If the keyword is contained in the file name as a word or set of words
+                if (file.matches(".*\\b"+keyword+"\\b.*")) {
+                    hasFile = true;
+                    searchResults += " " + file ;
                     no_files++;
                 }
             }
+        }
+        if(!hasFile){
+            files= containsKeyWord(neighbourFileList,keyword);
+        }
 
-            packet = "SEARCHOK " + no_files + " " + IP + " " + port + " " + hops + " " + searchResults;
+        if (hasFile) {//this node has the keyword
 
-        }else if (neighbourFileList.containsKey(book)) {//neighbour nodes have the book
-      
-         
-        }else{
-            if(hops>1){
-                //forward to local client
-            }else{
-                //send not fount message
+            packet = "SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
+            String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
+            packet = length.concat(" "+ packet);
+        }
+        else if (!files.isEmpty()) {//neighbour nodes have the keyword
+
+            for(String file: files){
+                ArrayList<String> IPAddresses = neighbourFileList.get(file);
+                if(!IPAddresses.isEmpty()){
+                    for(String IP:IPAddresses ){
+                        //Only sends one search result
+                        no_files++;
+                        searchResults = " "+ file;
+                        packet = "SEROK " + no_files + " " + IP + " " + port + " " + hops + searchResults;
+                        String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
+                        packet = length.concat(" "+ packet);
+                        break;
+                    }
+
+                }
+
+            }
+        } else { //otherwise
+            if (hops > 1) {
+                //number of hops should be checked at the server side by reading search message request
+                //and only forward to client if not expired
+
+                //forward the message if not expired
+                for (Connection connection : connections) {
+                    String IP = connection.getIp();
+                    Integer connectionPort = connection.getPort();
+
+                    packet = "SER " + keyword + " " + hops + " " + IP + " " +  connectionPort;
+                    String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
+                    packet = length.concat(" "+ packet);
+                }
+
             }
         }
-        */
 
+        Node.sendRequest(packet);
 
 
     }
-
+    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<String>> neighbourFileList,String keyword){
+        ArrayList<String> files=new ArrayList<String>();
+        Set<String> keys = neighbourFileList.keySet();
+        for(String key :keys){
+            if(key.matches(".*\\b"+keyword+"\\b.*")){
+                files.add(key);
+            }
+        }
+        return  files;
+    }
 }
