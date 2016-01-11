@@ -12,27 +12,43 @@ import java.util.Scanner;
  */
 class Node implements Serializable {
 
-    private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+   // private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BSServerPort = 1026;
     private static String ip = "127.0.0.1";
     private static  int size=1024;
-    private static int port=9878;
+   // private static int port=9878;
+
+
+
+    private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+    private static int BS_Port;
+    private static String BS_IP;
+    private static String port;
 
     public static void main(String args[]){
+
         String command;
         Server server;
         Client client;
         boolean begin = true,registration;
+
+        System.out.println("Enter the ip and port of the Bootstrap Server eg 1:- 52.74.101.117 1027");
+        Scanner scanner = new Scanner(System.in);
+
+        String bsDetails = scanner.nextLine();
+        String[] bsData = bsDetails.split(" ");
+
+        BS_IP = bsData[0];
+        BS_Port = Integer.parseInt(bsData[1]);
+
         while(begin) {
             System.out.println("Enter the port you need to start the server eg 1:- START 9876 ");
-            Scanner scanner = new Scanner(System.in);
 
             command = scanner.next();
             if (command.equals("START")) {
-                String port = scanner.next();
+                port = scanner.next();
                 registration = registerToServer();
                 if(registration){
-                    Node.port=Integer.parseInt(port);
                     server = new Server(port);
                     client = new Client(port);
                     server.start();
@@ -54,7 +70,7 @@ class Node implements Serializable {
 
             sendData = packet.getBytes();
 
-            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
             clientSocket.send(sendPacket);
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             clientSocket.receive(receivePacket);
@@ -78,10 +94,24 @@ class Node implements Serializable {
 
         try{
             BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
-            System.out.println("Enter Command to Register with BS");
-            String userCommand = inFromUser.readLine();
+            System.out.println("Enter Username to Register with BS");
+            String userName = inFromUser.readLine();
 
-            Socket clientSocket = new Socket(ip, BSServerPort);
+            InetAddress IP = InetAddress.getLocalHost();
+            String ipAddress = IP.getHostAddress();
+
+            String command = " REG " + ipAddress + " " + port + " " + userName;
+            int fullLength = command.length() + 4;
+
+            String fullLengthStr = "";
+            for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
+                fullLengthStr +=  "0";
+            }
+            fullLengthStr += Integer.toString(fullLength);
+
+            String userCommand = fullLengthStr + command;
+
+            Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
 
