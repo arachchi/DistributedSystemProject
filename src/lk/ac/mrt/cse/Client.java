@@ -27,7 +27,7 @@ public class Client extends Thread {
         while(true){
             System.out.println("Enter your command. eg 1:- INTI eg 2:- SEARCH file_name");
             command = scanner.next();
-            if(command.equals("INIT")){
+            if(command.equals("JOIN")){
                 init();
             }
 
@@ -41,7 +41,7 @@ public class Client extends Thread {
     public void init(){
         try {
             InetAddress IPAddress = InetAddress.getByName("localhost");
-            String packet = "INIT " + IPAddress.getHostAddress() + " " + port;
+            String packet = "JOIN " + IPAddress.getHostAddress() + " " + port;
             Node.sendRequest(packet);
         }catch (Exception e){
             e.printStackTrace();
