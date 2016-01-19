@@ -19,16 +19,11 @@ public class Server extends Thread {
     int port=9878;
     final static int size=1024;
 
-    public Server(){
-        fileList = new ArrayList<String>();
-        connections = new ArrayList<Connection>();
-        neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
-    }
-
     public Server(String port){
         this.port=Integer.parseInt(port);
         fileList = new ArrayList<String>();
         connections = new ArrayList<Connection>();
+        neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
     }
 
 
