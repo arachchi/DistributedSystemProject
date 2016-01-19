@@ -3,9 +3,7 @@ package lk.ac.mrt.cse;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
 //import java.util.Hashtable;
 
 /**
@@ -16,7 +14,7 @@ import java.util.Set;
 public class Server extends Thread {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
-    Hashtable<String, ArrayList<String>> neighbourFileList;
+    Hashtable<String, ArrayList<Connection>> neighbourFileList;
 
     int port=9878;
     final static int size=1024;
@@ -24,7 +22,7 @@ public class Server extends Thread {
     public Server(){
         fileList = new ArrayList<String>();
         connections = new ArrayList<Connection>();
-        neighbourFileList = new Hashtable<String, ArrayList<String>>();
+        neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
     }
 
     public Server(String port){
@@ -90,7 +88,7 @@ public class Server extends Thread {
         String packet = "";
         boolean hasFile = false;//Flags whether this node contains the file
         boolean fromLocalClient=false; //Flags if the request is from the local client
-        ArrayList<String> files=new ArrayList<String>();;
+        ArrayList<String> files=new ArrayList<String>();
 
         String searchResults = "";//search results
         int no_files = 0;//no of search results
@@ -129,13 +127,13 @@ public class Server extends Thread {
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
             for(String file: files){
-                ArrayList<String> IPAddresses = neighbourFileList.get(file);
-                if(!IPAddresses.isEmpty()){
-                    for(String IP:IPAddresses ){
+                ArrayList<Connection> connections = neighbourFileList.get(file);
+                if(!connections.isEmpty()){
+                    for(Connection connection:connections ){
                         //Only sends one search result
                         no_files++;
                         searchResults = " "+ file;
-                        packet = "SEROK " + no_files + " " + IP + " " + port + " " + hops + searchResults;
+                        packet = "SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
                         String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
                         packet = length.concat(" "+ packet);
                         break;
@@ -150,6 +148,8 @@ public class Server extends Thread {
                 //and only forward to client if not expired
 
                 //forward the message if not expired
+                Collections.sort(connections,new CustomComparator());
+
                 for (Connection connection : connections) {
                     String IP = connection.getIp();
                     Integer connectionPort = connection.getPort();
@@ -166,7 +166,8 @@ public class Server extends Thread {
 
 
     }
-    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<String>> neighbourFileList,String keyword){
+
+    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
         ArrayList<String> files=new ArrayList<String>();
         Set<String> keys = neighbourFileList.keySet();
         for(String key :keys){
@@ -175,5 +176,12 @@ public class Server extends Thread {
             }
         }
         return  files;
+    }
+}
+
+class CustomComparator implements Comparator<Connection> {
+    @Override
+    public int compare(Connection o1, Connection o2) {
+        return Integer.valueOf(o1.getNoOfConnections()).compareTo(o2.getNoOfConnections());
     }
 }

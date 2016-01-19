@@ -9,6 +9,7 @@ public class Connection {
     private String ip;
     private String userName;
     private int port;
+
     private int noOfConnections;
 
     public Connection(String ip, String port){
@@ -53,6 +54,14 @@ public class Connection {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public int getNoOfConnections() {
+        return noOfConnections;
+    }
+
+    public void setNoOfConnections(int noOfConnections) {
+        this.noOfConnections = noOfConnections;
     }
 
     @Override
