@@ -16,17 +16,27 @@ public class Client extends Thread {
     int hops=5;
     ArrayList<String> fileList;
 
-    public Client(String port,ArrayList<String> fileList){
-        this.fileList = fileList;
+    public Client(String port){
+        fileList = new ArrayList<String>();
         this.port = Integer.parseInt(port);
     }
 
     public void run(){
+        Scanner scanner = new Scanner(System.in);
+        String command,fileName;
+        while(true){
+            System.out.println("Enter your command. eg 1:- INTI eg 2:- SEARCH file_name");
+            command = scanner.next();
+            if(command.equals("JOIN")){
+                init();
+            }
 
+            else if(command.equals("SEARCH")){
+                fileName = scanner.next();
+                search(fileName);
+            }
+        }
     }
-
-
-
 
     public void init(){
         try {
@@ -37,7 +47,7 @@ public class Client extends Thread {
             e.printStackTrace();
         }
     }
-    public String search(String keyword){
+    public void search(String keyword){
 
         boolean hasBook = false;//Flags whether this node contains the file
         String searchResults = "";//search results
@@ -52,7 +62,7 @@ public class Client extends Thread {
             }
         }
         if(hasBook){
-            return "The searched keyword is present in my list of files.";
+            System.out.println("The searched keyword is present in my list of files.");
         }
         else{
             //Passes the search query to the local server, then the local server handles the query
@@ -67,9 +77,7 @@ public class Client extends Thread {
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
 
-            return Node.sendRequest(packet);
-
-
+            Node.sendRequest(packet);
         }
     }
 

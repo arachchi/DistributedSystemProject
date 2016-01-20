@@ -1,11 +1,9 @@
 package lk.ac.mrt.cse;
 
-import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.*;
-//import java.io.OutputStream;
 //import java.util.Hashtable;
 
 /**
@@ -18,19 +16,14 @@ public class Server extends Thread {
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
 
-    PrintStream printStream = new PrintStream(new ServerLogWindow());
-
-
     int port=9878;
     final static int size=1024;
 
-    public Server(String port,ArrayList<String> fileList){
-        this.fileList = fileList;
+    public Server(String port){
         this.port=Integer.parseInt(port);
+        fileList = new ArrayList<String>();
         connections = new ArrayList<Connection>();
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
-
-        //System.setOut(printStream);
     }
 
 
@@ -58,9 +51,6 @@ public class Server extends Thread {
 
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
                 serverSocket.send(sendPacket);
-
-                sleep(1000);
-
             }
         }catch (Exception e){
             e.printStackTrace();

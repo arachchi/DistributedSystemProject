@@ -1,10 +1,5 @@
 package lk.ac.mrt.cse;
 
-
-import com.sun.org.apache.xpath.internal.SourceTree;
-
-
-import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -21,66 +16,46 @@ class Node implements Serializable {
     private static String ip = "127.0.0.1";
     private static  int size=1024;
 
+    private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
-    private static String userName;
-    ArrayList<String> fileList;
 
-    Node(ArrayList<String> fileList){
-        this.fileList = fileList;
+    public static void main(String args[]){
 
-    }
-
-    private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
-
-    public static void setBS_Port(int BS_Port) {
-        Node.BS_Port = BS_Port;
-    }
-
-    public static void setBsIp(String bsIp) {
-        BS_IP = bsIp;
-    }
-
-    public static void setPort(String port) {
-        Node.port = port;
-    }
-
-    public static void setNodeListbyBS(ArrayList<Connection> nodeListbyBS) {
-        Node.nodeListbyBS = nodeListbyBS;
-    }
-
-    public static void setUserName(String userName) {
-        Node.userName = userName;
-    }
-
-    private static String status;
-    public String getStaus(){return status;}
-    Server server;
-    Client client;
-
-    public boolean execute(){
-
-       // String command;
-
+        String command;
+        Server server;
+        Client client;
         boolean begin = true,registration;
 
+        System.out.println("Enter the ip and port of the Bootstrap Server eg 1:- 52.74.101.117 1027");
+        Scanner scanner = new Scanner(System.in);
 
+        String bsDetails = scanner.nextLine();
+        String[] bsData = bsDetails.split(" ");
+
+        BS_IP = bsData[0];
+        BS_Port = Integer.parseInt(bsData[1]);
+
+        while(begin) {
+            System.out.println("Enter the port you need to start the server eg 1:- START 9876 ");
+
+            command = scanner.next();
+            if (command.equals("START")) {
+                port = scanner.next();
                 registration = registerToServer();
                 if(registration){
-                    server = new Server(port,fileList);
-                    client = new Client(port,fileList);
+                    server = new Server(port);
+                    client = new Client(port);
                     server.start();
                     client.start();
-                    //begin=false;
-                    return true;
-                }else{
-                    return false;
+                    begin=false;
                 }
-    
+            }
+        }
     }
 
-    public static String sendRequest(String packet){
+    public static void sendRequest(String packet){
         try {
             DatagramSocket clientSocket = new DatagramSocket();
 
@@ -97,13 +72,10 @@ class Node implements Serializable {
             clientSocket.receive(receivePacket);
             String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            clientSocket.close();
             System.out.println("FROM SERVER:" + modifiedSentence);
-            return "FROM SERVER:" + modifiedSentence;
-
+            clientSocket.close();
         }catch (Exception e){
             e.printStackTrace();
-            return "Error";
         }
     }
 
@@ -117,9 +89,9 @@ class Node implements Serializable {
         boolean registered = false;
 
         try{
-            //BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
-           // System.out.println("Enter Username to Register with BS");
-            //String userName = inFromUser.readLine();
+            BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
+            System.out.println("Enter Username to Register with BS");
+            String userName = inFromUser.readLine();
 
             InetAddress IP = InetAddress.getLocalHost();
             String ipAddress = IP.getHostAddress();
@@ -145,7 +117,6 @@ class Node implements Serializable {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
-                status = "Error Message:" + serverResponseParts[1];
             }
             else{
                 if("REGOK".equals(serverResponseParts[1])){
@@ -157,16 +128,12 @@ class Node implements Serializable {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
-                        status = "failed, there is some error in the command";
                     } else if(noOfNodes == 9998){
                         System.out.println("failed, already registered to you, unregister first");
-                        status = "failed, already registered to you, unregister first";
                     } else if(noOfNodes == 9997){
                         System.out.println("failed, registered to another user, try a different IP and port");
-                        status = "failed, registered to another user, try a different IP and port";
                     } else if(noOfNodes == 9996){
                         System.out.println("failed, can’t register. BS full");
-                        status = "failed, can’t register. BS full";
                     } else{
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
@@ -192,7 +159,6 @@ class Node implements Serializable {
 
         if(registered){
             System.out.println("Successfully Registered");
-            status = "Successfully Registered";
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
@@ -200,16 +166,12 @@ class Node implements Serializable {
         }
         else{
             System.out.println("Registration Failure, Check Again");
-            status = "Registration Failure, Check Again";
         }
 
         return registered;
     }
 
-
-
     public static ArrayList<Connection> getNodeListbyBS() {
         return nodeListbyBS;
     }
 }
-
