@@ -3,6 +3,8 @@ package lk.ac.mrt.cse;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -17,11 +19,16 @@ class Node implements Serializable {
     private static  int size=1024;
 
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+    private static ArrayList<String> totalFilesList = new ArrayList<String>();
+    private static ArrayList<String> nodeFileList = new ArrayList<String>();
+
+    private static String RESOURCE_FILE_PATH = "../FileNames.txt";
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
+    private static int nodeFileCount = 3;
 
-    public static void main(String args[]){
+    public static void main(String args[]) throws IOException {
 
         String command;
         Server server;
@@ -53,6 +60,9 @@ class Node implements Serializable {
                 }
             }
         }
+
+        initializeFiles();
+
     }
 
     public static void sendRequest(String packet){
@@ -169,6 +179,69 @@ class Node implements Serializable {
         }
 
         return registered;
+    }
+
+    public static void initializeFiles(){
+
+        try{
+            int min, max = countLines();
+
+            if(max >0 ) {
+                min = 1;
+
+                //Initialize random number array
+                int[] randArr = new int[nodeFileCount];
+
+                //Get random numbers
+                Random rand = new Random();
+                int randomNum;
+
+                for (int i = 0; i < nodeFileCount; i++) {
+                    randomNum = rand.nextInt((max - min) + 1) + min;
+                    randArr[i] = randomNum;
+                }
+
+                Arrays.sort(randArr);
+
+                int index =0;
+
+                for(int i = 0 ; i < totalFilesList.size(); i++){
+
+                    if(i == randArr[index]){
+                        nodeFileList.add(totalFilesList.get(i));
+                        index++;
+
+                        if(index == nodeFileCount) break;
+                    }
+
+                }
+
+            }
+
+        } catch (IOException ex){
+            ex.printStackTrace();
+        }
+
+    }
+
+
+    public static int countLines() throws IOException {
+
+        FileInputStream fis = new FileInputStream(RESOURCE_FILE_PATH);
+
+        InputStreamReader inStreamReaderObject = new InputStreamReader(fis);
+
+        BufferedReader br = new BufferedReader(inStreamReaderObject );
+
+        String line = br.readLine();
+        while (line != null) {
+            totalFilesList.add(line);
+            line = br.readLine();
+        }
+        br.close();
+
+        return totalFilesList.size();
+
     }
 
     public static ArrayList<Connection> getNodeListbyBS() {
