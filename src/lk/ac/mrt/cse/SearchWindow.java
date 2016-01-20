@@ -13,7 +13,7 @@ public class SearchWindow extends  JFrame{
     private JLabel StatusLabel;
     private JPanel panel1;
 
-    public SearchWindow(Client c) {
+    public SearchWindow(final Client c) {
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -116,7 +116,7 @@ public class AddFile extends JFrame{
             }
         });
 
-        Node n = new Node(fileList);
+        final Node n = new Node(fileList);
 
         nextButton.addActionListener(new ActionListener() {
             @Override

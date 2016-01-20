@@ -24,7 +24,7 @@ public class RegWindow extends JFrame{
     String localPort="";
     String username="";
 
-    public RegWindow(Node n) {
+    public RegWindow(final Node n) {
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
