@@ -61,23 +61,23 @@ class Node implements Serializable {
 
     public boolean execute(){
 
-       // String command;
+        // String command;
 
         boolean begin = true,registration;
 
 
-                registration = registerToServer();
-                if(registration){
-                    server = new Server(port,fileList);
-                    client = new Client(port,fileList);
-                    server.start();
-                    client.start();
-                    //begin=false;
-                    return true;
-                }else{
-                    return false;
-                }
-    
+        registration = registerToServer();
+        if(registration){
+            server = new Server(port,fileList);
+            client = new Client(port,fileList);
+            server.start();
+            client.start();
+            //begin=false;
+            return true;
+        }else{
+            return false;
+        }
+
     }
 
     public static String sendRequest(String packet){
@@ -118,7 +118,7 @@ class Node implements Serializable {
 
         try{
             //BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
-           // System.out.println("Enter Username to Register with BS");
+            // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
             InetAddress IP = InetAddress.getLocalHost();
@@ -212,4 +212,3 @@ class Node implements Serializable {
         return nodeListbyBS;
     }
 }
-
