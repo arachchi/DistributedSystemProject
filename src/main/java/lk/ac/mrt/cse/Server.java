@@ -1,7 +1,5 @@
 package lk.ac.mrt.cse;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -72,36 +70,43 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
+        //Check if length of message is correct
+        int length = Integer.parseInt(message[0]);
 
-        if(message[1].equals("JOIN")){
-            //Connection will be established; Ip and port will be saved
-            Connection connection = new Connection(message[2],message[3]);//ip , port
+        if(query.length() == length){
+            if(message[1].equals("JOIN")){
+                //Connection will be established; Ip and port will be saved
+                Connection connection = new Connection(message[2],message[3]);//ip , port
 
-            try {
-                connections.add(connection);
+                try {
+                    connections.add(connection);
+                    //Send response to node
+                    String packet = "0013 JOINOK 0";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
+                catch(Exception ex){
+                    String packet = "0016 JOINOK 9999";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
 
-                //Send response to node
-                String packet = "0013 JOINOK 0";
-                Node.sendRequest(packet, message[2], message[3]);
+                //Get the file list of connection for Updating neighbour file list
+                getFileList(connection);
             }
-            catch(Exception ex){
-                String packet = "0016 JOINOK 9999";
-                Node.sendRequest(packet, message[2], message[3]);
+            else if(message[0].equals("SEARCH")){
+                search(message);
             }
-
-            //Get the file list of connection for Updating neighbour file list
-            //getFileList(connection);
+            else if(message[0].equals("GETFILES")){
+                sendFileList(message);
+            }
+            else if(message[0].equals("FILES")){
+                updateNighbourFileList(message);
+            }
+            System.out.println("RECEIVED: " + query);
+        }else{
+            //Send response of failure to node
+            String packet = "0010 ERROR";
+            Node.sendRequest(packet, message[2], message[3]);
         }
-        else if(message[0].equals("SEARCH")){
-            search(message);
-        }
-        else if(message[0].equals("GETFILES")){
-            sendFileList(message);
-        }
-        else if(message[0].equals("FILES")){
-            updateNighbourFileList(message);
-        }
-        System.out.println("RECEIVED: " + query);
     }
 
     private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....
@@ -116,18 +121,18 @@ public class Server extends Thread {
             e.printStackTrace();
         }
 
-        String packet = "FILES " +Node.getHostAddress() + " " +port ;
+        String packet = " FILES " +Node.getHostAddress() + " " +port ;
         for(String file : fileList){
             packet=packet.concat(" "+ file);
         }
-        String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
-        packet = length.concat(" "+ packet);
-        Node.sendRequest(packet,RequesterIPAddress,port);
+
+        String userCommand = Node.getUniversalCommand(packet);
+        Node.sendRequest(userCommand,RequesterIPAddress,port);
     }
 
     private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
         //Request connection file list
-        String packet = "GETFILES";
+        String packet = " GETFILES";
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
@@ -136,7 +141,9 @@ public class Server extends Thread {
             e.printStackTrace();
         }
         packet=packet.concat(" "+Node.getHostAddress()+" "+port);
-        Node.sendRequest(packet,connection.getIp(),connection.getPort());
+        String userCommand = Node.getUniversalCommand(packet);
+
+        Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
     }
 
     private void updateNighbourFileList(String[] message){
@@ -168,7 +175,6 @@ public class Server extends Thread {
         String SearcherIPAddress = message[3];
         String port = message[4];
 
-        hops--;//should be handled in server side
         String packet = "";
         boolean hasFile = false;//Flags whether this node contains the file
         boolean fromLocalClient=false; //Flags if the request is from the local client
@@ -184,6 +190,9 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println("search ip " + SearcherIPAddress );
+        System.out.println("ip address to str " + IPAddress.toString());
 
         if(SearcherIPAddress.equals(IPAddress.toString())){
             fromLocalClient=true;
@@ -204,10 +213,11 @@ public class Server extends Thread {
 
         if (hasFile) {//this node has the keyword
 
-            packet = "SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
-            String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
-            packet = length.concat(" "+ packet);
-            Node.sendRequest(packet,SearcherIPAddress,port);
+            packet = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
+
+            String userCommand = Node.getUniversalCommand(packet);
+
+            Node.sendRequest(userCommand,SearcherIPAddress,port);
         }
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
@@ -218,10 +228,10 @@ public class Server extends Thread {
                         //Only sends one search result
                         no_files++;
                         searchResults = " "+ file;
-                        packet = "SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
-                        String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
-                        packet = length.concat(" "+ packet);
-                        Node.sendRequest(packet,SearcherIPAddress,port);
+                        packet = " SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
+
+                        String userCommand = Node.getUniversalCommand(packet);
+                        Node.sendRequest(userCommand,SearcherIPAddress,port);
                         break;
                     }
 
@@ -238,8 +248,11 @@ public class Server extends Thread {
                 for (Connection connection : connections) {
                     String IP = connection.getIp();
                     String connectionPort = connection.getPort();
-                    packet = "SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-                    Node.sendRequest(packet,IP,connectionPort);
+                    packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
+
+                    String userCommand = Node.getUniversalCommand(packet);
+
+                    Node.sendRequest(userCommand,IP,connectionPort);
                 }
 
             }
