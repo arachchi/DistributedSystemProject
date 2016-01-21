@@ -73,12 +73,25 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
-        if(message[0].equals("JOIN")){
+
+        if(message[1].equals("JOIN")){
             //Connection will be established; Ip and port will be saved
-            Connection connection = new Connection(message[1],message[2]);//ip , port
-            connections.add(connection);
+            Connection connection = new Connection(message[2],message[3]);//ip , port
+
+            try {
+                connections.add(connection);
+
+                //Send response to node
+                String packet = "0013 JOINOK 0";
+                Node.sendRequest(packet, message[2], message[3]);
+            }
+            catch(Exception ex){
+                String packet = "0016 JOINOK 9999";
+                Node.sendRequest(packet, message[2], message[3]);
+            }
+
             //Get the file list of connection for Updating neighbour file list
-            getFileList(connection);
+            //getFileList(connection);
         }
         else if(message[0].equals("SEARCH")){
             search(message);

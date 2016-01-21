@@ -3,16 +3,11 @@ package lk.ac.mrt.cse;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
 
 /**
  * @author nuran
@@ -37,7 +32,6 @@ public class Client extends Thread {
     }
 
     public void init(){
-        System.out.println("In init");
         try {
 
             ArrayList<Connection> allNodes = Node.getNodeListbyBS();
@@ -79,7 +73,17 @@ public class Client extends Thread {
     }
 
     public void connectToNode(Connection con){
-        String packet = "jOIN " + con.getIp() + " " + con.getPort();
+        //Generating packet to send
+        String command = " JOIN " + Node.getNodeIp() + " " + Node.getPort();
+        int fullLength = command.length() + 4;
+
+        String fullLengthStr = "";
+        for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
+            fullLengthStr +=  "0";
+        }
+        fullLengthStr += Integer.toString(fullLength);
+
+        String packet = fullLengthStr + command;
         Node.sendRequest(packet,con.getIp(),""+con.getPort());
     }
 
