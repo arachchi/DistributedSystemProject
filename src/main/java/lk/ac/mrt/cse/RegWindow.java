@@ -44,30 +44,44 @@ public class RegWindow extends JFrame{
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                bsIP = textField1.getText();
-                bsPort = textField4.getText();
-                localPort = textField3.getText();
-                username = textField2.getText();
 
-                node.setBS_Port(Integer.parseInt(bsPort));
-                node.setBsIp(bsIP);
-                node.setPort(localPort);
-                node.setUserName(username);
 
-                boolean registered = false;
+                if(connectButton.getText()=="Register") {
+                    bsIP = textField1.getText();
+                    bsPort = textField4.getText();
+                    localPort = textField3.getText();
+                    username = textField2.getText();
+
+                    node.setBS_Port(Integer.parseInt(bsPort));
+                    node.setBsIp(bsIP);
+                    node.setPort(localPort);
+                    node.setUserName(username);
+
+
+                    boolean registered = false;
 
                     registered = node.execute();
                     textArea1.setText(node.getStaus());
 
-                    if(registered){
-                        joinWithNetworkButton.setEnabled(true);
-                        connectButton.setEnabled(false);
-                        showLogButton.setEnabled(false);
+                    if (registered) {
+
                         node.server.addObserver(log);
                         node.client.addObserver(log);
                         log.setVisible(true);
+
+                        joinWithNetworkButton.setEnabled(true);
                         showLogButton.setEnabled(true);
+
+                        connectButton.setText("Unregister");
+
+
                     }
+
+                }else{
+
+                    node.unRegisterToServer();
+                    connectButton.setText("Register");
+                }
             }
         });
         joinWithNetworkButton.addActionListener(new ActionListener() {
@@ -79,7 +93,6 @@ public class RegWindow extends JFrame{
         bookSearchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setVisible(false);
                 SearchWindow sw = new SearchWindow(node.client);
                 sw.setVisible(true);
             }

@@ -16,7 +16,7 @@ public class SearchWindow extends  JFrame{
     public SearchWindow(final Client client) {
 
         setContentPane(panel1);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 500);
         setTitle("Client : Search Files");
 

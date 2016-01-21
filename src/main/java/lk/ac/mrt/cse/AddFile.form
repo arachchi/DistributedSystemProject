@@ -55,20 +55,20 @@
           <text value="Existing files : "/>
         </properties>
       </component>
-      <component id="533f7" class="javax.swing.JButton" binding="nextButton" default-binding="true">
-        <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Next"/>
-        </properties>
-      </component>
       <component id="7329" class="javax.swing.JButton" binding="exitButton" default-binding="true">
         <constraints>
           <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Exit"/>
+        </properties>
+      </component>
+      <component id="533f7" class="javax.swing.JButton" binding="nextButton" default-binding="true">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Next"/>
         </properties>
       </component>
     </children>

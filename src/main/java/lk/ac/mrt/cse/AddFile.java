@@ -3,10 +3,7 @@ package lk.ac.mrt.cse;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,7 +77,6 @@ public class AddFile extends JFrame{
 
     public AddFile() {
         initializeFiles();
-        final ArrayList<String> fileList = nodeFileList;
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -89,21 +85,22 @@ public class AddFile extends JFrame{
         setTitle("Client : Add New Files");
         initializeFiles();
 
-        if(fileList.size()<1){
+        if(nodeFileList.size()<1){
             textPane1.setText("No files are added yet..");
         }else{
-            displayList(fileList);
+            displayList(nodeFileList);
         }
 
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fileList.add(textField1.getText());
-                displayList(fileList);
+                nodeFileList.add(textField1.getText());
+                totalFilesList.add(textField1.getText());
+                displayList(nodeFileList);
             }
         });
 
-        final Node node = new Node(fileList);
+        final Node node = new Node(nodeFileList);
 
         nextButton.addActionListener(new ActionListener() {
             @Override
@@ -126,5 +123,21 @@ public class AddFile extends JFrame{
             list += s +"\n";
         }
         textPane1.setText(list);
+    }
+
+
+    private void writeList(){
+        FileOutputStream fileInputStream = new FileInputStream(RESOURCE_FILE_PATH);
+        InputStreamReader inStreamReaderObject = new InputStreamReader(fileInputStream);
+        BufferedReader bufferedReader = new BufferedReader(inStreamReaderObject );
+        String line = bufferedReader.readLine();
+
+        while (line != null) {
+            totalFilesList.add(line);
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+        return totalFilesList.size();
+
     }
 }
