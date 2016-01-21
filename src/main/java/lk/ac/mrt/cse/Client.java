@@ -1,21 +1,8 @@
 package lk.ac.mrt.cse;
 
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
-import java.lang.reflect.Array;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.*;
 
 /**
  * @author nuran
@@ -85,16 +72,8 @@ public class Client extends  Observable{
     public void connectToNode(Connection con){
         //Generating packet to send
         String command = " JOIN " + Node.getHostAddress() + " " + Node.getPort();
-        System.out.println("Testing system command"+command);
-        int fullLength = command.length() + 4;
 
-        String fullLengthStr = "";
-        for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
-            fullLengthStr +=  "0";
-        }
-        fullLengthStr += Integer.toString(fullLength);
-
-        String packet = fullLengthStr + command;
+        String packet = Node.getUniversalCommand(command);
         Node.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
 
@@ -120,15 +99,17 @@ public class Client extends  Observable{
             return "The searched keyword is present in my list of files.";
         }
         else{
-            String packet = "SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
-            String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
-            packet = length.concat(" "+ packet);
+            String packet = " SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
 
-            return Node.sendRequest(packet,Node.getHostAddress(),""+port);
+            String userCommand = Node.getUniversalCommand(packet);
+
             consoleMsg = Node.sendRequest(packet,IPAddress,""+port);
             setChanged();
             notifyObservers();
+
+            //return Node.sendRequest(userCommand, Node.getHostAddress(),""+port);
             return "Search request is forwarded to the network";
+
 
 
         }

@@ -1,8 +1,6 @@
 package lk.ac.mrt.cse;
 
 
-import com.sun.xml.internal.bind.v2.TODO;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -124,6 +122,24 @@ class Node extends Observable implements Serializable {
         }
     }
 
+    public static String getUniversalCommand(String command){
+
+        String length= String.format("%04d", command.length() + 4); //Length is always represented as 4 digits
+        command = length.concat(command);
+
+        /*int fullLength = command.length() + 4;
+
+        String fullLengthStr = "";
+        for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
+            fullLengthStr +=  "0";
+        }
+        fullLengthStr += Integer.toString(fullLength);
+
+        String userCommand = fullLengthStr + command;*/
+
+        return command;
+    }
+
     public static boolean registerToServer(){
         //Connect to the bootstrap server and get the list of nodes
         //send these list of nodes to the server instance
@@ -142,15 +158,8 @@ class Node extends Observable implements Serializable {
             nodeIp = ipAddress;
 
             String command = " REG " + ipAddress + " " + port + " " + userName;
-            int fullLength = command.length() + 4;
 
-            String fullLengthStr = "";
-            for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
-                fullLengthStr +=  "0";
-            }
-            fullLengthStr += Integer.toString(fullLength);
-
-            String userCommand = fullLengthStr + command;
+            String userCommand = getUniversalCommand(command);
 
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
