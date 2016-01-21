@@ -23,7 +23,7 @@ public class AddFile extends JFrame{
 
     private ArrayList<String> totalFilesList = new ArrayList<String>();
     private static ArrayList<String> nodeFileList = new ArrayList<String>();
-    private String RESOURCE_FILE_PATH = "../FileNames.txt";
+    private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
     private int nodeFileCount = 3;
 
     public void initializeFiles(){
@@ -128,12 +128,12 @@ public class AddFile extends JFrame{
                 r.setVisible(true);
 
                 JFrame f = new JFrame("ServerLogWindow");
-                ServerLogWindow sw=new ServerLogWindow();
+                ServerLogWindow sw = new ServerLogWindow();
                 f.setContentPane(sw.panel1);
                 f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                f.setSize(500,500);
-                f.setLocation(500,0);
-               // f.pack();
+                f.setSize(500, 500);
+                f.setLocation(500, 0);
+                // f.pack();
                 f.setTitle("Server : log");
                 f.setVisible(true);
 
