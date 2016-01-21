@@ -21,6 +21,7 @@ public class RegWindow extends JFrame{
     private JButton bookSearchButton;
     private JTextArea textArea1;
     private JButton showLogButton;
+    private JButton closeButton;
 
 
     String bsIP="";
@@ -36,7 +37,6 @@ public class RegWindow extends JFrame{
         setContentPane(panel1);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(500, 500);
-        //pack();
         setTitle("Client : Connect with Network");
         joinWithNetworkButton.setEnabled(false);
 
@@ -68,12 +68,12 @@ public class RegWindow extends JFrame{
                         node.server.addObserver(log);
                         node.client.addObserver(log);
                         log.setVisible(true);
+                        log.setSize(getWidth(),getHeight());
 
                         joinWithNetworkButton.setEnabled(true);
                         showLogButton.setEnabled(true);
 
                         connectButton.setText("Unregister");
-
 
                     }
 
@@ -94,6 +94,8 @@ public class RegWindow extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 SearchWindow sw = new SearchWindow(node.client);
+
+                sw.setSize(getWidth(),getHeight());
                 sw.setVisible(true);
             }
         });
@@ -103,11 +105,17 @@ public class RegWindow extends JFrame{
                 log.setVisible(true);
             }
         });
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                close();
+            }
+        });
     }
 
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
+    private void close(){
+        System.exit(0);
     }
 
 }

@@ -12,6 +12,7 @@ public class SearchWindow extends  JFrame{
     private JTextField textField1;
     private JLabel StatusLabel;
     private JPanel panel1;
+    private JButton closeButton;
 
     public SearchWindow(final Client client) {
 
@@ -27,7 +28,16 @@ public class SearchWindow extends  JFrame{
                 StatusLabel.setText(status);
             }
         });
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                close();
+            }
+        });
     }
 
+    private void close(){
+        setVisible(false);
+    }
 
 }

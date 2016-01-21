@@ -156,6 +156,10 @@ public class Client extends  Observable{
             }
         }
         if(hasBook){
+            consoleMsg = "The searched keyword is present in my list of files.";
+            setChanged();
+            notifyObservers();
+
             return "The searched keyword is present in my list of files.";
         }
         else{
@@ -171,7 +175,10 @@ public class Client extends  Observable{
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
 
-            return Node.sendRequest(packet,IPAddress,""+port);
+            consoleMsg = Node.sendRequest(packet,IPAddress,""+port);
+            setChanged();
+            notifyObservers();
+            return "Search request is forwarded to the network";
 
 
         }

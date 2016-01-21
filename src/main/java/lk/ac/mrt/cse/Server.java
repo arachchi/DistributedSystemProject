@@ -30,13 +30,6 @@ public class Server extends Observable implements Runnable {
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
         consoleMsg="";
 
-        System.out.println("Server const");
-        consoleMsg = "Server const";
-        System.out.println("Server const2");
-        setChanged();
-        notifyObservers();
-        System.out.println("Server const3");
-
     }
 
 

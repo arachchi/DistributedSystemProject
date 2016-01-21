@@ -7,13 +7,14 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Observable;
 
 /**
  * @author nuran
  * @version 1.0.
  * @since 1/4/16
  */
-class Node implements Serializable {
+class Node extends Observable implements Serializable {
     private static InetAddress myIp;
     private static int BSServerPort = 1026;
     private static String ip = "127.0.0.1";
@@ -25,6 +26,7 @@ class Node implements Serializable {
     private static String nodeIp;
     private static String userName;
     ArrayList<String> fileList;
+
 
     public static int getBS_Port() {
         return BS_Port;
@@ -116,6 +118,8 @@ class Node implements Serializable {
 
             clientSocket.close();
             System.out.println("FROM SERVER:" + modifiedSentence);
+
+
             return "FROM SERVER:" + modifiedSentence;
 
         }catch (Exception e){

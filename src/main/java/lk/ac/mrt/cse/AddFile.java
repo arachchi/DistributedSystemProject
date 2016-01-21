@@ -18,7 +18,7 @@ public class AddFile extends JFrame{
     private JTextField textField1;
     private JTextPane textPane1;
     private JButton nextButton;
-    private JButton exitButton;
+    private JButton closeButton;
 
     private ArrayList<String> totalFilesList = new ArrayList<String>();
     private static ArrayList<String> nodeFileList = new ArrayList<String>();
@@ -80,6 +80,8 @@ public class AddFile extends JFrame{
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocation(500,100);
+        //setLocationRelativeTo(null);
         setSize(500, 500);
         //pack();
         setTitle("Client : Add New Files");
@@ -107,14 +109,29 @@ public class AddFile extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 ///private
+
+                writeList();
+
                 RegWindow regWindow = new RegWindow(node);
+                regWindow.setLocation(x(),y());
                 regWindow.setVisible(true);
 
-                JFrame serverLogWindow = new JFrame("ServerLogWindow");
 
 
             }
         });
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                close();
+            }
+        });
+    }
+    private int x(){
+        return getX();
+    }
+    private int y(){
+        return getY();
     }
 
     private void displayList(ArrayList<String> fileList){
@@ -127,17 +144,23 @@ public class AddFile extends JFrame{
 
 
     private void writeList(){
-        FileOutputStream fileInputStream = new FileInputStream(RESOURCE_FILE_PATH);
-        InputStreamReader inStreamReaderObject = new InputStreamReader(fileInputStream);
-        BufferedReader bufferedReader = new BufferedReader(inStreamReaderObject );
-        String line = bufferedReader.readLine();
 
-        while (line != null) {
-            totalFilesList.add(line);
-            line = bufferedReader.readLine();
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(RESOURCE_FILE_PATH);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        bufferedReader.close();
-        return totalFilesList.size();
 
+        for(String line : totalFilesList){
+            writer.append(line+"\n");
+        }
+
+        writer.close();
+
+    }
+
+    private void close(){
+        System.exit(0);
     }
 }
