@@ -73,6 +73,44 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
+<<<<<<< HEAD
+        System.out.println(message);
+
+        //Check if length of message is correct
+        int length = Integer.parseInt(message[0]);
+
+        if(query.length() == length){
+
+            //Check if it request is a "JOIN"
+            if(message[1].equals("JOIN")){
+                //Connection will be established; Ip and port will be saved
+
+                Connection connection = new Connection(message[2], message[3]);//ip , port
+
+                try {
+                    connections.add(connection);
+
+                    //Send response to node
+                    String packet = "0013 JOINOK 0";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
+                catch(Exception ex){
+                    String packet = "0016 JOINOK 9999";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
+            }
+            //Check if request is a SER
+            else if(message[0].equals("SEARCH")){
+                search(message);
+            }
+            System.out.println("RECEIVED: " + query);
+        }else{
+            //Send response of failure to node
+            String packet = "0010 ERROR";
+            Node.sendRequest(packet, message[2], message[3]);
+        }
+
+=======
         if(message[0].equals("JOIN")){
             //Connection will be established; Ip and port will be saved
             Connection connection = new Connection(message[1],message[2]);//ip , port
@@ -90,6 +128,7 @@ public class Server extends Thread {
             updateNighbourFileList(message);
         }
         System.out.println("RECEIVED: " + query);
+>>>>>>> upstream/master
     }
 
     private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....

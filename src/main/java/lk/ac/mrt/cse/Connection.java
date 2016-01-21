@@ -8,26 +8,26 @@ package lk.ac.mrt.cse;
 public class Connection {
     private String ip;
     private String userName;
-    private int port;
+    private String port;
 
     private int noOfConnections;
 
     public Connection(String ip, String port){
         this.ip = ip;
-        this.port = Integer.parseInt(port);
+        this.port = port;
         this.noOfConnections = 0;
     }
 
     public Connection(String ip, String port, String username){
         this.ip = ip;
-        this.port = Integer.parseInt(port);
+        this.port = port;
         this.userName = username;
         this.noOfConnections = 0;
     }
 
     public Connection(String ip, String port , String username, String noOfConnections){
         this.ip = ip;
-        this.port = Integer.parseInt(port);
+        this.port = port;
         this.userName = username;
         this.noOfConnections = Integer.parseInt(noOfConnections);
     }
@@ -48,11 +48,11 @@ public class Connection {
         this.userName = userName;
     }
 
-    public int getPort() {
+    public String getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(String port) {
         this.port = port;
     }
 
