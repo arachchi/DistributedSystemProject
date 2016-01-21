@@ -113,7 +113,7 @@ class Node implements Serializable {
             String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
             clientSocket.close();
-            System.out.println("FROM SERVER:" + modifiedSentence);
+            System.out.println("FROM SERVER:" + modifiedSentence);//TODO
             return "FROM SERVER:" + modifiedSentence;
 
         }catch (Exception e){

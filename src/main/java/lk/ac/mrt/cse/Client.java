@@ -140,9 +140,9 @@ public class Client extends Thread {
         }
         else{
             //Passes the search query to the local server, then the local server handles the query
-            InetAddress IPAddress = null;
+            InetAddress IPAddress = Node.getIp();
             try {
-                IPAddress = InetAddress.getByName("localhost");
+                IPAddress = Node.getIp();
             } catch (Exception e) {
                 e.printStackTrace();
             }
