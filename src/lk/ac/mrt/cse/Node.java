@@ -26,8 +26,25 @@ class Node implements Serializable {
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
+    private static String nodeIp;
     private static String userName;
     ArrayList<String> fileList;
+
+    public static int getBS_Port() {
+        return BS_Port;
+    }
+
+    public static String getBsIp() {
+        return BS_IP;
+    }
+
+    public static String getNodeIp() {
+        return nodeIp;
+    }
+
+    public static String getPort() {
+        return port;
+    }
 
     Node(ArrayList<String> fileList){
         this.fileList = fileList;
@@ -124,6 +141,7 @@ class Node implements Serializable {
 
             InetAddress IP = InetAddress.getLocalHost();
             String ipAddress = IP.getHostAddress();
+            nodeIp = ipAddress;
 
             String command = " REG " + ipAddress + " " + port + " " + userName;
             int fullLength = command.length() + 4;
