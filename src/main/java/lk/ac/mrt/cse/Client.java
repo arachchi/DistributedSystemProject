@@ -5,10 +5,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -73,9 +75,6 @@ public class Client extends  Observable{
                         connectToNode(allNodes.get(i));
                     }
                 }
-
-                //Inform BS of the presence
-                connectToBS();
             }
 
         } catch (Exception e){
@@ -84,61 +83,19 @@ public class Client extends  Observable{
     }
 
     public void connectToNode(Connection con){
-        String packet = "JOIN " + Node.getIp() + " " + Node.getPort();
-        Node.sendRequest(packet,con.getIp(),""+con.getPort());
-    }
+        //Generating packet to send
+        String command = " JOIN " + Node.getHostAddress() + " " + Node.getPort();
+        System.out.println("Testing system command"+command);
+        int fullLength = command.length() + 4;
 
-    public void connectToBS() throws IOException {
-            String command = " JOIN " + Node.getNodeIp() + " " + Node.getPort();
-            int fullLength = command.length() + 4;
+        String fullLengthStr = "";
+        for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
+            fullLengthStr +=  "0";
+        }
+        fullLengthStr += Integer.toString(fullLength);
 
-            String fullLengthStr = "";
-            for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
-                fullLengthStr +=  "0";
-            }
-            fullLengthStr += Integer.toString(fullLength);
-
-            String userCommand = fullLengthStr + command;
-        System.out.println(userCommand);
-        consoleMsg = userCommand;
-        setChanged();
-        notifyObservers(consoleMsg);
-
-
-            Socket clientSocket = new Socket(Node.getBsIp(), Node.getBS_Port());
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            outToServer.write(userCommand.getBytes());
-
-            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String serverResponse = inFromServer.readLine();
-            String[] serverResponseParts = serverResponse.split(" ");
-
-            System.out.println(serverResponse);
-        consoleMsg = serverResponse;
-        setChanged();
-        notifyObservers(consoleMsg);
-
-            if(serverResponseParts.length==2){
-                System.out.println("Error Message:" + serverResponseParts[1]);
-                consoleMsg = "Error Message:" + serverResponseParts[1];
-                setChanged();
-                notifyObservers(consoleMsg);
-            }
-            else{
-                if("JOINOK".equals(serverResponseParts[1])){
-
-                    int responseCode = Integer.parseInt(serverResponseParts[2]);
-
-                    if(responseCode == 9999) {
-                        System.out.println("error while adding new node to routing table");
-                        consoleMsg = "error while adding new node to routing table";
-                        setChanged();
-                        notifyObservers(consoleMsg);
-                    }
-
-                }
-            }
-            clientSocket.close();
+        String packet = fullLengthStr + command;
+        Node.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
 
     public String search(String keyword){
@@ -163,18 +120,11 @@ public class Client extends  Observable{
             return "The searched keyword is present in my list of files.";
         }
         else{
-            //Passes the search query to the local server, then the local server handles the query
-            InetAddress IPAddress = null;
-            try {
-                IPAddress = InetAddress.getByName("localhost");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String packet = "SER " + keyword + " " + hops + " " + IPAddress + " " + port;
+            String packet = "SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
 
+            return Node.sendRequest(packet,Node.getHostAddress(),""+port);
             consoleMsg = Node.sendRequest(packet,IPAddress,""+port);
             setChanged();
             notifyObservers();

@@ -46,7 +46,7 @@ class Node extends Observable implements Serializable {
 
     Node(ArrayList<String> fileList){
         this.fileList = fileList;
-
+        getMyIp();
     }
 
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
@@ -80,8 +80,6 @@ class Node extends Observable implements Serializable {
         // String command;
         boolean registration = registerToServer();
         if(registration){
-
-
             server = new Server(port,fileList);
             Thread serverThread = new Thread(server);
             client = new Client(port,fileList);
@@ -117,9 +115,7 @@ class Node extends Observable implements Serializable {
             String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
             clientSocket.close();
-            System.out.println("FROM SERVER:" + modifiedSentence);
-
-
+            System.out.println("FROM SERVER:" + modifiedSentence);//TODO
             return "FROM SERVER:" + modifiedSentence;
 
         }catch (Exception e){
@@ -141,7 +137,7 @@ class Node extends Observable implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = InetAddress.getLocalHost();
+            InetAddress IP = Node.getIp();
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -241,7 +237,7 @@ class Node extends Observable implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = InetAddress.getLocalHost();
+            InetAddress IP = Node.getIp();
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -342,6 +338,10 @@ class Node extends Observable implements Serializable {
 
     public static InetAddress getIp(){
         return myIp;
+    }
+
+    public static String getHostAddress(){
+        return myIp.getHostAddress();
     }
 
     public static ArrayList<Connection> getNodeListbyBS() {
