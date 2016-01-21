@@ -5,6 +5,10 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Random;
 import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -72,7 +76,6 @@ public class Client extends  Observable{
 
                 //Inform BS of the presence
                 connectToBS();
-
             }
 
         } catch (Exception e){
@@ -81,7 +84,7 @@ public class Client extends  Observable{
     }
 
     public void connectToNode(Connection con){
-        String packet = "jOIN " + con.getIp() + " " + con.getPort();
+        String packet = "JOIN " + Node.getIp() + " " + Node.getPort();
         Node.sendRequest(packet,con.getIp(),""+con.getPort());
     }
 
