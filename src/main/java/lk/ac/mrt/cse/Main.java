@@ -12,7 +12,7 @@ public class Main {
 
         ArrayList<String> fileList = new ArrayList<String>();
         //JFrame f1 = new JFrame("AddFile");
-        AddFile addFile = new AddFile(fileList);
+        AddFile addFile = new AddFile();
 
         addFile.setVisible(true);
 
