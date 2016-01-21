@@ -1,4 +1,4 @@
-package lk.ac.mrt.cse;
+package main.java.lk.ac.mrt.cse;
 
 /**
  * @author nuran

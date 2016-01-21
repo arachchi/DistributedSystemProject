@@ -1,4 +1,4 @@
-package lk.ac.mrt.cse;
+package main.java.lk.ac.mrt.cse;
 
 
 import com.sun.org.apache.xpath.internal.SourceTree;
