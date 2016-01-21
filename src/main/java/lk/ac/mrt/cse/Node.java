@@ -342,6 +342,14 @@ class Node extends Observable implements Serializable {
             }
         }catch (Exception e){
             e.printStackTrace();
+        }finally {
+            try {
+                if (myIp == null) {
+                    myIp = InetAddress.getLocalHost();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
