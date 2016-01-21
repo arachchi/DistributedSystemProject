@@ -1,4 +1,4 @@
-package main.java.lk.ac.mrt.cse;
+package lk.ac.mrt.cse;
 
 
 import java.io.BufferedReader;
@@ -71,9 +71,6 @@ public class Client extends Thread {
                     }
                 }
 
-                //Inform BS of the presence
-                connectToBS();
-
             }
 
         } catch (Exception e){
@@ -84,46 +81,6 @@ public class Client extends Thread {
     public void connectToNode(Connection con){
         String packet = "jOIN " + con.getIp() + " " + con.getPort();
         Node.sendRequest(packet,con.getIp(),""+con.getPort());
-    }
-
-    public void connectToBS() throws IOException {
-            String command = " JOIN " + Node.getNodeIp() + " " + Node.getPort();
-            int fullLength = command.length() + 4;
-
-            String fullLengthStr = "";
-            for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
-                fullLengthStr +=  "0";
-            }
-            fullLengthStr += Integer.toString(fullLength);
-
-            String userCommand = fullLengthStr + command;
-        System.out.println(userCommand);
-
-            Socket clientSocket = new Socket(Node.getBsIp(), Node.getBS_Port());
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            outToServer.write(userCommand.getBytes());
-
-            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String serverResponse = inFromServer.readLine();
-            String[] serverResponseParts = serverResponse.split(" ");
-
-            System.out.println(serverResponse);
-
-            if(serverResponseParts.length==2){
-                System.out.println("Error Message:" + serverResponseParts[1]);
-            }
-            else{
-                if("JOINOK".equals(serverResponseParts[1])){
-
-                    int responseCode = Integer.parseInt(serverResponseParts[2]);
-
-                    if(responseCode == 9999) {
-                        System.out.println("error while adding new node to routing table");
-                    }
-
-                }
-            }
-            clientSocket.close();
     }
 
     public String search(String keyword){

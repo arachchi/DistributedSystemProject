@@ -1,4 +1,4 @@
-package main.java.lk.ac.mrt.cse;
+package lk.ac.mrt.cse;
 
 
 import java.io.*;
@@ -87,7 +87,7 @@ class Node implements Serializable {
     }
     public static String sendRequest(String packet,String ip,String port){
         try {
-            InetAddress IPAddress = InetAddress.getByAddress(ip.getBytes());
+            InetAddress IPAddress = InetAddress.getByName(ip);
             return sendRequest(packet,IPAddress,port);
         }catch (Exception e){
             e.printStackTrace();

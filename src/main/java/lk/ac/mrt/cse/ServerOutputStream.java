@@ -1,4 +1,4 @@
-package main.java.lk.ac.mrt.cse;
+package lk.ac.mrt.cse;
 
 /**
  * Created by kulakshi on 1/20/16.

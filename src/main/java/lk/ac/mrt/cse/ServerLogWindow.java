@@ -1,4 +1,4 @@
-package main.java.lk.ac.mrt.cse;
+package lk.ac.mrt.cse;
 
 import javax.swing.*;
 import java.io.IOException;

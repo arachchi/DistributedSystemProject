@@ -1,4 +1,6 @@
-package main.java.lk.ac.mrt.cse;
+package lk.ac.mrt.cse;
+
+import com.sun.org.apache.xpath.internal.SourceTree;
 
 import java.io.PrintStream;
 import java.net.DatagramPacket;
@@ -71,15 +73,42 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
-        if(message[0].equals("JOIN")){
-            //Connection will be established; Ip and port will be saved
-            Connection connection = new Connection(message[1],message[2]);//ip , port
-            connections.add(connection);
+        System.out.println(message);
+
+        //Check if length of message is correct
+        int length = Integer.parseInt(message[0]);
+
+        if(query.length() == length){
+
+            //Check if it request is a "JOIN"
+            if(message[1].equals("JOIN")){
+                //Connection will be established; Ip and port will be saved
+
+                Connection connection = new Connection(message[2], message[3]);//ip , port
+
+                try {
+                    connections.add(connection);
+
+                    //Send response to node
+                    String packet = "0013 JOINOK 0";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
+                catch(Exception ex){
+                    String packet = "0016 JOINOK 9999";
+                    Node.sendRequest(packet, message[2], message[3]);
+                }
+            }
+            //Check if request is a SER
+            else if(message[0].equals("SEARCH")){
+                search(message);
+            }
+            System.out.println("RECEIVED: " + query);
+        }else{
+            //Send response of failure to node
+            String packet = "0010 ERROR";
+            Node.sendRequest(packet, message[2], message[3]);
         }
-        else if(message[0].equals("SEARCH")){
-            search(message);
-        }
-        System.out.println("RECEIVED: " + query);
+
     }
 
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
