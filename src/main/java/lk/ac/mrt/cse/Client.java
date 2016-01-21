@@ -68,8 +68,6 @@ public class Client extends Thread {
                         connectToNode(allNodes.get(i));
                     }
                 }
-
-
             }
 
         } catch (Exception e){
@@ -79,7 +77,8 @@ public class Client extends Thread {
 
     public void connectToNode(Connection con){
         //Generating packet to send
-        String command = " JOIN " + Node.getNodeIp() + " " + Node.getPort();
+        String command = " JOIN " + Node.getHostAddress() + " " + Node.getPort();
+        System.out.println("Testing system command"+command);
         int fullLength = command.length() + 4;
 
         String fullLengthStr = "";
@@ -89,7 +88,7 @@ public class Client extends Thread {
         fullLengthStr += Integer.toString(fullLength);
 
         String packet = fullLengthStr + command;
-        Node.sendRequest(packet,con.getIp(),""+con.getPort());
+        Node.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
 
     public String search(String keyword){
@@ -110,19 +109,11 @@ public class Client extends Thread {
             return "The searched keyword is present in my list of files.";
         }
         else{
-            //Passes the search query to the local server, then the local server handles the query
-            InetAddress IPAddress = Node.getIp();
-            try {
-                IPAddress = Node.getIp();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String packet = "SER " + keyword + " " + hops + " " + IPAddress + " " + port;
+            String packet = "SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
 
-            return Node.sendRequest(packet,IPAddress,""+port);
+            return Node.sendRequest(packet,Node.getHostAddress(),""+port);
 
 
         }

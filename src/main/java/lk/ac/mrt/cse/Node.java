@@ -337,6 +337,10 @@ class Node implements Serializable {
         return myIp;
     }
 
+    public static String getHostAddress(){
+        return myIp.getHostAddress();
+    }
+
     public static ArrayList<Connection> getNodeListbyBS() {
         return nodeListbyBS;
     }

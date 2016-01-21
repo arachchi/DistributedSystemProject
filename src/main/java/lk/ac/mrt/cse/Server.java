@@ -116,7 +116,7 @@ public class Server extends Thread {
             e.printStackTrace();
         }
 
-        String packet = "FILES " +IPAddress + " " +port ;
+        String packet = "FILES " +Node.getHostAddress() + " " +port ;
         for(String file : fileList){
             packet=packet.concat(" "+ file);
         }
@@ -135,7 +135,7 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        packet=packet.concat(" "+IPAddress+" "+port);
+        packet=packet.concat(" "+Node.getHostAddress()+" "+port);
         Node.sendRequest(packet,connection.getIp(),connection.getPort());
     }
 
