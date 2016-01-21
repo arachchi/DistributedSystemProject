@@ -83,7 +83,7 @@ public class Client extends Thread {
 
     public void connectToNode(Connection con){
         String packet = "jOIN " + con.getIp() + " " + con.getPort();
-        Node.sendRequest(packet);
+        Node.sendRequest(packet,con.getIp(),""+con.getPort());
     }
 
     public void connectToBS() throws IOException {
@@ -156,7 +156,7 @@ public class Client extends Thread {
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
 
-            return Node.sendRequest(packet);
+            return Node.sendRequest(packet,IPAddress,""+port);
 
 
         }

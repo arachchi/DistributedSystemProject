@@ -85,12 +85,18 @@ class Node implements Serializable {
         }
 
     }
-
     public static String sendRequest(String packet,String ip,String port){
         try {
+            InetAddress IPAddress = InetAddress.getByAddress(ip.getBytes());
+            return sendRequest(packet,IPAddress,port);
+        }catch (Exception e){
+            e.printStackTrace();
+            return "Error";
+        }
+    }
+    public static String sendRequest(String packet,InetAddress IPAddress,String port){
+        try {
             DatagramSocket clientSocket = new DatagramSocket();
-
-            InetAddress IPAddress = InetAddress.getByAddress(ip.getBytes());//wrong
 
             byte[] sendData;
             byte[] receiveData = new byte[size];
