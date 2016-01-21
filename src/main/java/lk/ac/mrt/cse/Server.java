@@ -129,6 +129,7 @@ public class Server extends Thread {
             packet = "SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
+            Node.sendRequest(packet,SearcherIPAddress,port);
         }
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
@@ -142,6 +143,7 @@ public class Server extends Thread {
                         packet = "SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
                         String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
                         packet = length.concat(" "+ packet);
+                        Node.sendRequest(packet,SearcherIPAddress,port);
                         break;
                     }
 
@@ -160,16 +162,14 @@ public class Server extends Thread {
                     String IP = connection.getIp();
                     Integer connectionPort = connection.getPort();
 
-                    packet = "SER " + keyword + " " + hops + " " + IP + " " +  connectionPort;
+                    packet = "SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
                     String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
                     packet = length.concat(" "+ packet);
+                    Node.sendRequest(packet,IP,connectionPort.toString());
                 }
 
             }
         }
-
-        Node.sendRequest(packet);
-
 
     }
 
