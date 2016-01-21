@@ -9,35 +9,34 @@ import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * @author nuran
  * @version 1.0.
  * @since 1/8/16
  */
-public class Client extends Thread {
+public class Client extends  Observable{
     int size=1024;
     int port=9878;
     int hops=5;
     ArrayList<String> fileList;
     private int connectingNodeCount = 2;
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
+    String consoleMsg;
 
     public Client(String port,ArrayList<String> fileList){
         this.fileList = fileList;
         this.port = Integer.parseInt(port);
+        consoleMsg="";
     }
 
-    public void run(){
-
-    }
 
     public void init(){
         System.out.println("In init");
+        consoleMsg = "In Init";
+        setChanged();
+        notifyObservers(consoleMsg);
         try {
 
             ArrayList<Connection> allNodes = Node.getNodeListbyBS();
@@ -98,6 +97,10 @@ public class Client extends Thread {
 
             String userCommand = fullLengthStr + command;
         System.out.println(userCommand);
+        consoleMsg = userCommand;
+        setChanged();
+        notifyObservers(consoleMsg);
+
 
             Socket clientSocket = new Socket(Node.getBsIp(), Node.getBS_Port());
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
@@ -108,9 +111,15 @@ public class Client extends Thread {
             String[] serverResponseParts = serverResponse.split(" ");
 
             System.out.println(serverResponse);
+        consoleMsg = serverResponse;
+        setChanged();
+        notifyObservers(consoleMsg);
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
+                consoleMsg = "Error Message:" + serverResponseParts[1];
+                setChanged();
+                notifyObservers(consoleMsg);
             }
             else{
                 if("JOINOK".equals(serverResponseParts[1])){
@@ -119,6 +128,9 @@ public class Client extends Thread {
 
                     if(responseCode == 9999) {
                         System.out.println("error while adding new node to routing table");
+                        consoleMsg = "error while adding new node to routing table";
+                        setChanged();
+                        notifyObservers(consoleMsg);
                     }
 
                 }

@@ -75,10 +75,12 @@ class Node implements Serializable {
         // String command;
         boolean registration = registerToServer();
         if(registration){
+
+
             server = new Server(port,fileList);
+            Thread serverThread = new Thread(server);
             client = new Client(port,fileList);
-            server.start();
-            client.start();
+            serverThread.start();
             return true;
         }else{
             return false;
@@ -204,10 +206,11 @@ class Node implements Serializable {
 
         if(registered){
             System.out.println("Successfully Registered");
-            status = "Successfully Registered";
+            status = "Successfully Registered \n";
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+                status+= con.getIp() + " " + con.getPort() + " " + con.getUserName()+"\n";
             }
         }
         else{

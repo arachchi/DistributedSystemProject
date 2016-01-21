@@ -21,6 +21,7 @@ public class AddFile extends JFrame{
     private JTextField textField1;
     private JTextPane textPane1;
     private JButton nextButton;
+    private JButton exitButton;
 
     private ArrayList<String> totalFilesList = new ArrayList<String>();
     private static ArrayList<String> nodeFileList = new ArrayList<String>();
@@ -113,14 +114,7 @@ public class AddFile extends JFrame{
                 regWindow.setVisible(true);
 
                 JFrame serverLogWindow = new JFrame("ServerLogWindow");
-                ServerLogWindow sw = new ServerLogWindow();
-                serverLogWindow.setContentPane(sw.panel1);
-                serverLogWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                serverLogWindow.setSize(500, 500);
-                serverLogWindow.setLocation(500, 0);
-                // serverLogWindow.pack();
-                serverLogWindow.setTitle("Server : log");
-                serverLogWindow.setVisible(true);
+
 
             }
         });

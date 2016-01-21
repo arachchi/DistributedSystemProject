@@ -3,6 +3,8 @@ package lk.ac.mrt.cse;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by kulakshi on 1/19/16.
@@ -17,21 +19,27 @@ public class RegWindow extends JFrame{
     private JLabel statusLabel;
     private JButton joinWithNetworkButton;
     private JButton bookSearchButton;
+    private JTextArea textArea1;
+    private JButton showLogButton;
 
 
     String bsIP="";
     String bsPort="";
     String localPort="";
     String username="";
+    final Node node;
 
     public RegWindow(final Node node) {
+        ServerLog log = new ServerLog(node);
 
+        this.node = node;
         setContentPane(panel1);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(500, 500);
         //pack();
         setTitle("Client : Connect with Network");
         joinWithNetworkButton.setEnabled(false);
+
 
         connectButton.addActionListener(new ActionListener() {
             @Override
@@ -49,10 +57,16 @@ public class RegWindow extends JFrame{
                 boolean registered = false;
 
                     registered = node.execute();
-                    statusLabel.setText(node.getStaus());
+                    textArea1.setText(node.getStaus());
+
                     if(registered){
                         joinWithNetworkButton.setEnabled(true);
                         connectButton.setEnabled(false);
+                        showLogButton.setEnabled(false);
+                        node.server.addObserver(log);
+                        node.client.addObserver(log);
+                        log.setVisible(true);
+                        showLogButton.setEnabled(true);
                     }
             }
         });
@@ -70,6 +84,17 @@ public class RegWindow extends JFrame{
                 sw.setVisible(true);
             }
         });
+        showLogButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.setVisible(true);
+            }
+        });
+    }
+
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 
 }

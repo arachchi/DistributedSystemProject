@@ -1,5 +1,7 @@
 package lk.ac.mrt.cse;
 
+import com.sun.java.accessibility.util.TopLevelWindowMulticaster;
+
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -11,12 +13,12 @@ import java.util.*;
  * @version 1.0.
  * @since 1/8/16
  */
-public class Server extends Thread {
+public class Server extends Observable implements Runnable {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
+    String consoleMsg;
 
-    PrintStream printStream = new PrintStream(new ServerLogWindow());
 
 
     int port=9878;
@@ -27,9 +29,17 @@ public class Server extends Thread {
         this.port=Integer.parseInt(port);
         connections = new ArrayList<Connection>();
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
+        consoleMsg="";
 
-        //System.setOut(printStream);
+        System.out.println("Server const");
+        consoleMsg = "Server const";
+        System.out.println("Server const2");
+        setChanged();
+        notifyObservers();
+        System.out.println("Server const3");
+
     }
+
 
 
     public void run(){
@@ -40,6 +50,11 @@ public class Server extends Thread {
 
             while (true) {
                 System.out.println("Server is waiting:");
+                consoleMsg = "Server is waiting:";
+                setChanged();
+                notifyObservers();
+
+
 
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
@@ -57,7 +72,7 @@ public class Server extends Thread {
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
                 serverSocket.send(sendPacket);
 
-                sleep(1000);
+                Thread.sleep(1000);
 
             }
         }catch (Exception e){
@@ -68,6 +83,9 @@ public class Server extends Thread {
     public void requestProcess(String query){
 
         System.out.println("In requestProcess");
+        consoleMsg = "In requestProcess";
+        setChanged();
+        notifyObservers();
 
         String[] message = query.split(" ");
 
@@ -80,6 +98,9 @@ public class Server extends Thread {
             search(message);
         }
         System.out.println("RECEIVED: " + query);
+        consoleMsg = "RECEIVED: " + query;
+        setChanged();
+        notifyObservers();
     }
 
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
@@ -183,6 +204,8 @@ public class Server extends Thread {
         }
         return  files;
     }
+
+
 }
 
 class CustomComparator implements Comparator<Connection> {

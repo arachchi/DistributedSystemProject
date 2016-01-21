@@ -13,20 +13,18 @@ public class SearchWindow extends  JFrame{
     private JLabel StatusLabel;
     private JPanel panel1;
 
-    public SearchWindow(final Client c) {
+    public SearchWindow(final Client client) {
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //pack();
         setSize(500, 500);
         setTitle("Client : Search Files");
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String status = c.search(textField1.getText());
+                String status = client.search(textField1.getText());
                 StatusLabel.setText(status);
-
             }
         });
     }
