@@ -75,11 +75,75 @@ public class Server extends Thread {
             //Connection will be established; Ip and port will be saved
             Connection connection = new Connection(message[1],message[2]);//ip , port
             connections.add(connection);
+            //Get the file list of connection for Updating neighbour file list
+            getFileList(connection);
         }
         else if(message[0].equals("SEARCH")){
             search(message);
         }
+        else if(message[0].equals("GETFILES")){
+            sendFileList(message);
+        }
+        else if(message[0].equals("FILES")){
+            updateNighbourFileList(message);
+        }
         System.out.println("RECEIVED: " + query);
+    }
+
+    private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....
+        String RequesterIPAddress = message[1];
+        String port = message[2];
+
+        //Get IP of localhost
+        InetAddress IPAddress = null;
+        try {
+            IPAddress = InetAddress.getByName("localhost");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String packet = "FILES " +IPAddress + " " +port ;
+        for(String file : fileList){
+            packet=packet.concat(" "+ file);
+        }
+        String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
+        packet = length.concat(" "+ packet);
+        Node.sendRequest(packet,RequesterIPAddress,port);
+    }
+
+    private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
+        //Request connection file list
+        String packet = "GETFILES";
+        //Get IP of localhost
+        InetAddress IPAddress = null;
+        try {
+            IPAddress = InetAddress.getByName("localhost");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        packet=packet.concat(" "+IPAddress+" "+port);
+        Node.sendRequest(packet,connection.getIp(),connection.getPort());
+    }
+
+    private void updateNighbourFileList(String[] message){
+        String SenderIPAddress = message[1];
+        String port = message[2];
+        Connection connection=null;
+        for(Connection con: connections){
+            if(con.getIp().equals(SenderIPAddress) && con.getPort().equals(port)){
+                connection=con;
+            }
+        }
+        ArrayList<Connection> existingConnections;
+        for(int i=3;i<message.length;++i){
+            if(neighbourFileList.containsKey(message[i]) && connection!=null){
+                existingConnections = neighbourFileList.get(message[i]);
+            }else{
+                existingConnections=new ArrayList<Connection>();
+            }
+            existingConnections.add(connection);
+            neighbourFileList.put(message[i],existingConnections);
+        }
     }
 
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
@@ -160,12 +224,9 @@ public class Server extends Thread {
 
                 for (Connection connection : connections) {
                     String IP = connection.getIp();
-                    Integer connectionPort = connection.getPort();
-
+                    String connectionPort = connection.getPort();
                     packet = "SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-                    String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
-                    packet = length.concat(" "+ packet);
-                    Node.sendRequest(packet,IP,connectionPort.toString());
+                    Node.sendRequest(packet,IP,connectionPort);
                 }
 
             }
