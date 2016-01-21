@@ -20,7 +20,6 @@ public class Server extends Thread {
 
     PrintStream printStream = new PrintStream(new ServerLogWindow());
 
-
     int port=9878;
     final static int size=1024;
 
@@ -233,7 +232,6 @@ public class Server extends Thread {
             if (hops > 1) {
                 //number of hops should be checked at the server side by reading search message request
                 //and only forward to client if not expired
-
                 //forward the message if not expired
                 Collections.sort(connections,new CustomComparator());
 

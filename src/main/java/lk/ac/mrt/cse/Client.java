@@ -3,11 +3,14 @@ package lk.ac.mrt.cse;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * @author nuran
@@ -32,6 +35,7 @@ public class Client extends Thread {
     }
 
     public void init(){
+        System.out.println("In init");
         try {
 
             ArrayList<Connection> allNodes = Node.getNodeListbyBS();
@@ -64,6 +68,7 @@ public class Client extends Thread {
                         connectToNode(allNodes.get(i));
                     }
                 }
+
 
             }
 
