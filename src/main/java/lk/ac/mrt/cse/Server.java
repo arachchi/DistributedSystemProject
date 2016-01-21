@@ -5,8 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.*;
-//import java.io.OutputStream;
-//import java.util.Hashtable;
 
 /**
  * @author nuran
@@ -73,7 +71,7 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
-        if(message[0].equals("INIT")){
+        if(message[0].equals("JOIN")){
             //Connection will be established; Ip and port will be saved
             Connection connection = new Connection(message[1],message[2]);//ip , port
             connections.add(connection);
@@ -131,6 +129,7 @@ public class Server extends Thread {
             packet = "SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
             String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
             packet = length.concat(" "+ packet);
+            Node.sendRequest(packet,SearcherIPAddress,port);
         }
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
@@ -144,6 +143,7 @@ public class Server extends Thread {
                         packet = "SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
                         String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
                         packet = length.concat(" "+ packet);
+                        Node.sendRequest(packet,SearcherIPAddress,port);
                         break;
                     }
 
@@ -162,16 +162,14 @@ public class Server extends Thread {
                     String IP = connection.getIp();
                     Integer connectionPort = connection.getPort();
 
-                    packet = "SER " + keyword + " " + hops + " " + IP + " " +  connectionPort;
+                    packet = "SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
                     String length= String.format("%04d", packet.length() + 4); //Length is always represented as 4 digits
                     packet = length.concat(" "+ packet);
+                    Node.sendRequest(packet,IP,connectionPort.toString());
                 }
 
             }
         }
-
-        Node.sendRequest(packet);
-
 
     }
 

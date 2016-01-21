@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -35,34 +36,27 @@ public class AddFile extends JFrame{
                 min = 1;
 
                 //Initialize random number array
-                int[] randArr = new int[nodeFileCount];
-
+                ArrayList<Integer> randArr=new ArrayList<Integer>();
                 //Get random numbers
                 Random rand = new Random();
                 int randomNum;
 
-                for (int i = 0; i < nodeFileCount; i++) {
+                while (randArr.size()<= nodeFileCount) {
                     randomNum = rand.nextInt((max - min) + 1) + min;
-                    randArr[i] = randomNum;
+                    randArr.add(randomNum);
                 }
-
-                Arrays.sort(randArr);
+                Collections.sort(randArr);
 
                 int index =0;
-
                 for(int i = 0 ; i < totalFilesList.size(); i++){
 
-                    if(i == randArr[index]){
+                    if(i == randArr.get(index)){
                         nodeFileList.add(totalFilesList.get(i));
                         index++;
-
                         if(index == nodeFileCount) break;
                     }
-
                 }
-
             }
-
         } catch (IOException ex){
             ex.printStackTrace();
         }
@@ -70,26 +64,20 @@ public class AddFile extends JFrame{
     }
 
     public int countLines() throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(RESOURCE_FILE_PATH);
+        InputStreamReader inStreamReaderObject = new InputStreamReader(fileInputStream);
+        BufferedReader bufferedReader = new BufferedReader(inStreamReaderObject );
+        String line = bufferedReader.readLine();
 
-        FileInputStream fis = new FileInputStream(RESOURCE_FILE_PATH);
-
-        InputStreamReader inStreamReaderObject = new InputStreamReader(fis);
-
-        BufferedReader br = new BufferedReader(inStreamReaderObject );
-
-        String line = br.readLine();
         while (line != null) {
             totalFilesList.add(line);
-            line = br.readLine();
+            line = bufferedReader.readLine();
         }
-        br.close();
-
+        bufferedReader.close();
         return totalFilesList.size();
-
     }
 
     public AddFile() {
-
         initializeFiles();
         final ArrayList<String> fileList = nodeFileList;
 
@@ -98,7 +86,6 @@ public class AddFile extends JFrame{
         setSize(500, 500);
         //pack();
         setTitle("Client : Add New Files");
-
         initializeFiles();
 
         if(fileList.size()<1){
@@ -106,7 +93,6 @@ public class AddFile extends JFrame{
         }else{
             displayList(fileList);
         }
-
 
         button1.addActionListener(new ActionListener() {
             @Override
@@ -116,26 +102,25 @@ public class AddFile extends JFrame{
             }
         });
 
-        final Node n = new Node(fileList);
+        final Node node = new Node(fileList);
 
         nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 ///private
-                RegWindow r = new RegWindow(n);
+                RegWindow regWindow = new RegWindow(node);
+                regWindow.setVisible(true);
 
-                r.setVisible(true);
-
-                JFrame f = new JFrame("ServerLogWindow");
+                JFrame serverLogWindow = new JFrame("ServerLogWindow");
                 ServerLogWindow sw = new ServerLogWindow();
-                f.setContentPane(sw.panel1);
-                f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                f.setSize(500, 500);
-                f.setLocation(500, 0);
-                // f.pack();
-                f.setTitle("Server : log");
-                f.setVisible(true);
+                serverLogWindow.setContentPane(sw.panel1);
+                serverLogWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                serverLogWindow.setSize(500, 500);
+                serverLogWindow.setLocation(500, 0);
+                // serverLogWindow.pack();
+                serverLogWindow.setTitle("Server : log");
+                serverLogWindow.setVisible(true);
 
             }
         });

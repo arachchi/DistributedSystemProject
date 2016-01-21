@@ -1,16 +1,9 @@
 package main.java.lk.ac.mrt.cse;
 
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
-
-import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.Random;
 
 /**
  * @author nuran
@@ -79,30 +72,31 @@ class Node implements Serializable {
     Client client;
 
     public boolean execute(){
-
         // String command;
-
-        boolean begin = true,registration;
-
-        registration = registerToServer();
+        boolean registration = registerToServer();
         if(registration){
             server = new Server(port,fileList);
             client = new Client(port,fileList);
             server.start();
             client.start();
-            //begin=false;
             return true;
         }else{
             return false;
         }
 
     }
-
-    public static String sendRequest(String packet){
+    public static String sendRequest(String packet,String ip,String port){
+        try {
+            InetAddress IPAddress = InetAddress.getByAddress(ip.getBytes());
+            return sendRequest(packet,IPAddress,port);
+        }catch (Exception e){
+            e.printStackTrace();
+            return "Error";
+        }
+    }
+    public static String sendRequest(String packet,InetAddress IPAddress,String port){
         try {
             DatagramSocket clientSocket = new DatagramSocket();
-
-            InetAddress IPAddress = InetAddress.getByName("localhost");
 
             byte[] sendData;
             byte[] receiveData = new byte[size];
@@ -126,7 +120,6 @@ class Node implements Serializable {
     }
 
     public static boolean registerToServer(){
-        //registration details are included here.
         //Connect to the bootstrap server and get the list of nodes
         //send these list of nodes to the server instance
         //if you cannot connect to the server using the user name and the password, ask a port and other details again

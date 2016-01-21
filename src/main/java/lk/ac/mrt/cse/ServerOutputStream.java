@@ -4,10 +4,9 @@ package main.java.lk.ac.mrt.cse;
  * Created by kulakshi on 1/20/16.
  */
 
+import javax.swing.*;
 import java.io.IOException;
-        import java.io.OutputStream;
-
-        import javax.swing.JTextArea;
+import java.io.OutputStream;
 
 public class  ServerOutputStream extends OutputStream {
     private JTextArea textArea;
