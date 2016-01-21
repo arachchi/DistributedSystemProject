@@ -82,7 +82,7 @@ public class Client extends Thread {
     }
 
     public void connectToNode(Connection con){
-        String packet = "INIT " + con.getIp() + " " + con.getPort();
+        String packet = "jOIN " + con.getIp() + " " + con.getPort();
         Node.sendRequest(packet);
     }
 

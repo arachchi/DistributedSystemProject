@@ -24,7 +24,7 @@ public class RegWindow extends JFrame{
     String localPort="";
     String username="";
 
-    public RegWindow(final Node n) {
+    public RegWindow(final Node node) {
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,57 +36,40 @@ public class RegWindow extends JFrame{
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-
                 bsIP = textField1.getText();
                 bsPort = textField4.getText();
                 localPort = textField3.getText();
                 username = textField2.getText();
 
-
-
-
-
-                n.setBS_Port(Integer.parseInt(bsPort));
-                n.setBsIp(bsIP);
-                n.setPort(localPort);
-                n.setUserName(username);
-
+                node.setBS_Port(Integer.parseInt(bsPort));
+                node.setBsIp(bsIP);
+                node.setPort(localPort);
+                node.setUserName(username);
 
                 boolean registered = false;
 
-                    registered = n.execute();
-                    statusLabel.setText(n.getStaus());
+                    registered = node.execute();
+                    statusLabel.setText(node.getStaus());
                     if(registered){
                         joinWithNetworkButton.setEnabled(true);
                         connectButton.setEnabled(false);
                     }
-
-
-
-
-
-
-
-
             }
         });
         joinWithNetworkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                n.client.init();
+                node.client.init();
             }
         });
         bookSearchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                SearchWindow sw = new SearchWindow(n.client);
+                SearchWindow sw = new SearchWindow(node.client);
                 sw.setVisible(true);
-
             }
         });
     }
-
 
 }

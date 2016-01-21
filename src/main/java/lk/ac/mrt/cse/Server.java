@@ -71,7 +71,7 @@ public class Server extends Thread {
 
         String[] message = query.split(" ");
 
-        if(message[0].equals("INIT")){
+        if(message[0].equals("JOIN")){
             //Connection will be established; Ip and port will be saved
             Connection connection = new Connection(message[1],message[2]);//ip , port
             connections.add(connection);
