@@ -44,7 +44,7 @@ class Node implements Serializable {
 
     Node(ArrayList<String> fileList){
         this.fileList = fileList;
-
+        getMyIp();
     }
 
     private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
@@ -135,7 +135,7 @@ class Node implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = InetAddress.getLocalHost();
+            InetAddress IP = Node.getIp();
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -234,7 +234,7 @@ class Node implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = InetAddress.getLocalHost();
+            InetAddress IP = Node.getIp();
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 

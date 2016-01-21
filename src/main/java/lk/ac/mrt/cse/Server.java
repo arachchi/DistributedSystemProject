@@ -96,7 +96,7 @@ public class Server extends Thread {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = InetAddress.getByName("localhost");
+            IPAddress = Node.getIp();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,7 +116,7 @@ public class Server extends Thread {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = InetAddress.getByName("localhost");
+            IPAddress = Node.getIp();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -165,7 +165,7 @@ public class Server extends Thread {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = InetAddress.getByName("localhost");
+            IPAddress = Node.getIp();
         } catch (Exception e) {
             e.printStackTrace();
         }
