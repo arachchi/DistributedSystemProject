@@ -1,16 +1,9 @@
 package lk.ac.mrt.cse;
 
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
-
-import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.Random;
 
 /**
  * @author nuran

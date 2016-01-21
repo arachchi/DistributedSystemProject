@@ -55,14 +55,10 @@ public class AddFile extends JFrame{
                     if(i == randArr[index]){
                         nodeFileList.add(totalFilesList.get(i));
                         index++;
-
                         if(index == nodeFileCount) break;
                     }
-
                 }
-
             }
-
         } catch (IOException ex){
             ex.printStackTrace();
         }
