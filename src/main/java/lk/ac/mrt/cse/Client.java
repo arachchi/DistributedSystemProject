@@ -2,6 +2,7 @@ package lk.ac.mrt.cse;
 
 
 import java.util.ArrayList;
+import java.util.Observable;
 import java.util.Random;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Random;
  * @version 1.0.
  * @since 1/8/16
  */
-public class Client extends  Observable{
+public class Client extends Observable {
     int size=1024;
     int port=9878;
     int hops=5;
@@ -103,7 +104,7 @@ public class Client extends  Observable{
 
             String userCommand = Node.getUniversalCommand(packet);
 
-            consoleMsg = Node.sendRequest(packet,IPAddress,""+port);
+            consoleMsg = Node.sendRequest(packet,Node.getHostAddress(),""+port);
             setChanged();
             notifyObservers();
 

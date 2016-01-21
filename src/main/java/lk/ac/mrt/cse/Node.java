@@ -153,7 +153,7 @@ class Node extends Observable implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = Node.getIp();
+            InetAddress IP = InetAddress.getLocalHost(); //Node.getIp();
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
