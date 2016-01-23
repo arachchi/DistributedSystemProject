@@ -1,10 +1,10 @@
 package lk.ac.mrt.cse;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
+/*import com.sun.org.apache.xpath.internal.SourceTree;
 
 import com.sun.java.accessibility.util.TopLevelWindowMulticaster;
 
-import java.io.PrintStream;
+import java.io.PrintStream;*/
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -83,6 +83,10 @@ public class Server extends Observable implements Runnable {
         String[] message = query.split(" ");
 
         //Check if length of message is correct
+        System.out.println("The message is ");
+        for(int i=0;i<message.length;++i){
+            System.out.println(message[i]);
+        }
         int length = Integer.parseInt(message[0]);
 
         if(query.length() == length){
@@ -223,6 +227,10 @@ public class Server extends Observable implements Runnable {
             }
         }
         if(!hasFile){
+            if(connections.isEmpty()){
+                System.out.println("I don't have the file and no more connections. Aborting search.");
+                return;
+            }
             files= containsKeyWord(neighbourFileList,keyword);
         }
 
@@ -240,13 +248,10 @@ public class Server extends Observable implements Runnable {
                 ArrayList<Connection> connections = neighbourFileList.get(file);
                 if(!connections.isEmpty()){
                     for(Connection connection:connections ){
-                        //Only sends one search result
-                        no_files++;
-                        searchResults = " "+ file;
-                        packet = " SEROK " + no_files + " " + connection.getIp() + " " + connection.getPort() + " " + hops + searchResults;
-
+                        //Only sends search query to one mapping neighbour if there are many
+                        packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
                         String userCommand = Node.getUniversalCommand(packet);
-                        Node.sendRequest(userCommand,SearcherIPAddress,port);
+                        Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
                         break;
                     }
 
@@ -258,17 +263,18 @@ public class Server extends Observable implements Runnable {
                 //number of hops should be checked at the server side by reading search message request
                 //and only forward to client if not expired
                 //forward the message if not expired
-                Collections.sort(connections,new CustomComparator());
 
-                for (Connection connection : connections) {
-                    String IP = connection.getIp();
-                    String connectionPort = connection.getPort();
-                    packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
+                    Collections.sort(connections,new CustomComparator());
 
-                    String userCommand = Node.getUniversalCommand(packet);
+                    for (Connection connection : connections) {
+                        String IP = connection.getIp();
+                        String connectionPort = connection.getPort();
+                        packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
 
-                    Node.sendRequest(userCommand,IP,connectionPort);
-                }
+                        String userCommand = Node.getUniversalCommand(packet);
+                        Node.sendRequest(userCommand,IP,connectionPort);
+                    }
+
 
             }
         }

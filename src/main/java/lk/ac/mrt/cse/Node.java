@@ -126,7 +126,6 @@ class Node extends Observable implements Serializable {
 
         String length= String.format("%04d", command.length() + 4); //Length is always represented as 4 digits
         command = length.concat(command);
-
         /*int fullLength = command.length() + 4;
 
         String fullLengthStr = "";

@@ -103,8 +103,7 @@ public class Client extends Observable {
             String packet = " SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
 
             String userCommand = Node.getUniversalCommand(packet);
-
-            consoleMsg = Node.sendRequest(packet,Node.getHostAddress(),""+port);
+            consoleMsg = Node.sendRequest(userCommand,Node.getHostAddress(),""+port);
             setChanged();
             notifyObservers();
 

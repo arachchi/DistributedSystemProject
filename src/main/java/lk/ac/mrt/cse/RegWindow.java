@@ -31,7 +31,7 @@ public class RegWindow extends JFrame{
     final Node node;
 
     public RegWindow(final Node node) {
-        ServerLog log = new ServerLog(node);
+        final ServerLog log = new ServerLog(node);
 
         this.node = node;
         setContentPane(panel1);
