@@ -24,7 +24,7 @@ class Node extends Observable implements Serializable {
     private static String nodeIp;
     private static String userName;
     ArrayList<String> fileList;
-
+    public static ArrayList<Connection> connections;// Routing Table
 
     public static int getBS_Port() {
         return BS_Port;
@@ -44,6 +44,7 @@ class Node extends Observable implements Serializable {
 
     Node(ArrayList<String> fileList){
         this.fileList = fileList;
+        connections = new ArrayList<Connection>();
         getMyIp();
     }
 
@@ -108,12 +109,12 @@ class Node extends Observable implements Serializable {
 
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
             clientSocket.send(sendPacket);
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            /*DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             clientSocket.receive(receivePacket);
-            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());*/
 
             clientSocket.close();
-            return "RECEIVED:" + modifiedSentence;
+            return "RECEIVED:" ;
 
         }catch (Exception e){
             e.printStackTrace();
@@ -334,7 +335,7 @@ class Node extends Observable implements Serializable {
                     myIp = addr.getAddress( );
                     if ( !( myIp instanceof Inet4Address) ) continue;
 
-                    System.out.println("  address: " + myIp.getHostAddress() +"/" + addr.getNetworkPrefixLength());
+                    //System.out.println("  address: " + myIp.getHostAddress() +"/" + addr.getNetworkPrefixLength());
                     System.out.println("  broadcast address: " +addr.getBroadcast( ).getHostAddress( ));
                 }
             }

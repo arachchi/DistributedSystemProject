@@ -19,6 +19,7 @@ public class Client extends Observable {
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     String consoleMsg;
 
+
     public Client(String port,ArrayList<String> fileList){
         this.fileList = fileList;
         this.port = Integer.parseInt(port);
@@ -71,9 +72,11 @@ public class Client extends Observable {
     }
 
     public void connectToNode(Connection con){
+        String ip=Node.getHostAddress();
+        String port=Node.getPort();
+        Node.connections.add(new Connection(ip,port));
         //Generating packet to send
-        String command = " JOIN " + Node.getHostAddress() + " " + Node.getPort();
-
+        String command = " JOIN " + ip + " " + port;
         String packet = Node.getUniversalCommand(command);
         Node.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
@@ -100,6 +103,9 @@ public class Client extends Observable {
             return "The searched keyword is present in my list of files.";
         }
         else{
+            if(keyword.contains(" ")){//Allows searching for key words with multiple words
+                keyword=keyword.replaceAll(" ","_");
+            }
             String packet = " SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
 
             String userCommand = Node.getUniversalCommand(packet);
