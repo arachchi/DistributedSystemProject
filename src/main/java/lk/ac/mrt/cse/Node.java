@@ -100,6 +100,7 @@ class Node extends Observable implements Serializable {
     }
     public static String sendRequest(String packet,InetAddress IPAddress,String port){
         try {
+            System.out.println("send req called. with "+packet+IPAddress.getHostName()+" port "+port);
             DatagramSocket clientSocket = new DatagramSocket();
 
             byte[] sendData;
@@ -109,12 +110,14 @@ class Node extends Observable implements Serializable {
 
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
             clientSocket.send(sendPacket);
-            /*DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            System.out.println("sent packet");
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             clientSocket.receive(receivePacket);
-            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());*/
+            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
             clientSocket.close();
-            return "RECEIVED:" ;
+            System.out.println("sent.");
+            return "RECEIVED:" + modifiedSentence;
 
         }catch (Exception e){
             e.printStackTrace();

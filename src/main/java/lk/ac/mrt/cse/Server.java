@@ -179,9 +179,7 @@ public class Server extends Observable implements Runnable {
 
         String keyword = message[2];
         System.out.println("searching for key "+message[2]);
-        if(keyword.contains("_")){//Convert keyword with multiple words
-            keyword=keyword.replaceAll("_"," ");
-        }
+
         int hops = Integer.parseInt(message[3])-1;
         String SearcherIPAddress = message[4];
         String port = message[5];
@@ -211,9 +209,13 @@ public class Server extends Observable implements Runnable {
 
                 //Collections.sort(connections,new CustomComparator());
                 System.out.println("trying to send request to connections");
+
                 for (Connection connection : Node.connections) {
                     String IP = connection.getIp();
                     String connectionPort = connection.getPort();
+
+                    System.out.println("connections's ip "+IP);
+                    System.out.println("connections's port "+port);
                     packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
 
                     String userCommand = Node.getUniversalCommand(packet);
@@ -224,6 +226,9 @@ public class Server extends Observable implements Runnable {
                 System.out.println("The maximum hop count is reached. Aborting search.");
             }
         }else{
+            if(keyword.contains("_")){//Convert keyword with multiple words
+                keyword=keyword.replaceAll("_"," ");
+            }
             for (String file : fileList) {
                 //If the keyword is contained in the file name as a word or set of words
                 if (file.matches(".*\\b"+keyword+"\\b.*")) {
@@ -246,7 +251,9 @@ public class Server extends Observable implements Runnable {
                         //number of hops should be checked at the server side by reading search message request
                         //and only forward to client if not expired
                         //forward the message if not expired
-
+                        if(keyword.contains(" ")){//Allows searching for key words with multiple words
+                            keyword=keyword.replaceAll(" ","_");
+                        }
                         //Collections.sort(connections,new CustomComparator());
                         for (Connection connection : Node.connections) {
                             String IP = connection.getIp();
