@@ -115,7 +115,7 @@ public class Server extends Observable implements Runnable {
                 sendFileList(message);
             }
             else if(message[0].equals("FILES")){
-                updateNighbourFileList(message);
+                updateNeighbourFileList(message);
             }
             System.out.println("RECEIVED: " + query);
             consoleMsg = "RECEIVED: " + query;
@@ -165,7 +165,7 @@ public class Server extends Observable implements Runnable {
         Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
     }
 
-    private void updateNighbourFileList(String[] message){
+    private void updateNeighbourFileList(String[] message){
         String SenderIPAddress = message[1];
         String port = message[2];
         Connection connection=null;
