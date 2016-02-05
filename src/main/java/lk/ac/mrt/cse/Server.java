@@ -48,11 +48,10 @@ public class Server extends Observable implements Runnable {
                 notifyObservers();
 
 
-
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
                 String query = new String(receivePacket.getData(), 0, receivePacket.getLength());
-
+                System.out.println("RECEIVED: " + query);
                 requestProcess(query); //processing the request query
 
                 //sending the reply to the client
@@ -75,18 +74,12 @@ public class Server extends Observable implements Runnable {
 
     public void requestProcess(String query){
 
-        System.out.println("In requestProcess");
         consoleMsg = "In requestProcess";
         setChanged();
         notifyObservers();
 
         String[] message = query.split(" ");
 
-        //Check if length of message is correct
-        System.out.println("The message is ");
-        for(int i=0;i<message.length;++i){
-            System.out.println(message[i]);
-        }
         int length = Integer.parseInt(message[0]);
 
         if(query.length() == length){
@@ -108,16 +101,16 @@ public class Server extends Observable implements Runnable {
                 //Get the file list of connection for Updating neighbour file list
                 getFileList(connection);
             }
-            else if(message[0].equals("SEARCH")){
+            else if(message[1].equals("SEARCH")){
                 search(message);
             }
-            else if(message[0].equals("GETFILES")){
+            else if(message[1].equals("GETFILES")){
                 sendFileList(message);
             }
-            else if(message[0].equals("FILES")){
+            else if(message[1].equals("FILES")){
                 updateNeighbourFileList(message);
             }
-            System.out.println("RECEIVED: " + query);
+
             consoleMsg = "RECEIVED: " + query;
             setChanged();
             notifyObservers();
@@ -129,8 +122,8 @@ public class Server extends Observable implements Runnable {
     }
 
     private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....
-        String RequesterIPAddress = message[1];
-        String port = message[2];
+        String RequesterIPAddress = message[2];
+        String port = message[3];
 
         //Get IP of localhost
         InetAddress IPAddress = null;
@@ -140,13 +133,19 @@ public class Server extends Observable implements Runnable {
             e.printStackTrace();
         }
 
-        String packet = " FILES " +Node.getHostAddress() + " " +port ;
-        for(String file : fileList){
-            packet=packet.concat(" "+ file);
+        String packet = " FILES " +Node.getHostAddress() + " " +port+" ";
+        for(int i=0;i<fileList.size();++i){
+            if(i!=fileList.size()-1){
+                packet=packet.concat(fileList.get(i)+",");
+            }else{
+                packet=packet.concat(fileList.get(i));
+            }
         }
 
         String userCommand = Node.getUniversalCommand(packet);
+        System.out.println("Trying to send a file list "+userCommand);
         Node.sendRequest(userCommand,RequesterIPAddress,port);
+        System.out.println("successfully sent a file list "+userCommand);
     }
 
     private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
