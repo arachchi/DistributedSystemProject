@@ -1,9 +1,16 @@
-package lk.ac.mrt.cse.system.imp;
+package lk.ac.mrt.cse.rpc.impl;
 
 
+import lk.ac.mrt.cse.rpc.NodeService;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.model.Connection;
 import lk.ac.mrt.cse.util.Utility;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -21,7 +28,7 @@ import java.util.Random;
  * @version 1.0.
  * @since 1/8/16
  */
-public class ClientImpl extends Observable implements Client {
+public class RPCClientImpl extends Observable implements Client {
     int hops=5;
     private ArrayList<String> fileList;
     private int connectingNodeCount = 2;
@@ -36,7 +43,7 @@ public class ClientImpl extends Observable implements Client {
     private static String userName;
     private static String status;
 
-    public ClientImpl(ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
+    public RPCClientImpl(ArrayList<String> fileList, String port, String BS_IP, int BS_Port, String userName){
         this.fileList = fileList;
         this.port = port;
         this.BS_IP = BS_IP;
@@ -47,7 +54,7 @@ public class ClientImpl extends Observable implements Client {
 
 
     public void init(){
-        System.out.println("In init");
+        System.out.println("RPC Client : In init");
         consoleMsg = "In Init";
         setChanged();
         notifyObservers(consoleMsg);
@@ -91,11 +98,24 @@ public class ClientImpl extends Observable implements Client {
     }
 
     public void connectToNode(Connection con){
-        //Generating packet to send
-        String command = " JOIN " + Utility.getHostAddress() + " " + port;
+        TTransport transport;
+        try {
+            transport = new TSocket(con.getIp(), Integer.parseInt(con.getPort()));
+            System.out.println("IP "+ con.getIp()+" port "+con.getPort());
+            TProtocol protocol = new TBinaryProtocol(transport);
 
-        String packet = Utility.getUniversalCommand(command);
-        Utility.sendRequest(packet, con.getIp(), "" + con.getPort());
+            NodeService.Client client = new NodeService.Client(protocol);
+            transport.open();
+
+            String result = client.join(nodeIp, Integer.parseInt(port));
+            System.out.println("result " + result);
+
+            transport.close();
+        } catch (TTransportException e) {
+            e.printStackTrace();
+        } catch (TException e) {
+            e.printStackTrace();
+        }
     }
 
     public String search(String keyword){

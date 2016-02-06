@@ -1,5 +1,7 @@
 package lk.ac.mrt.cse.gui;
 
+import lk.ac.mrt.cse.rpc.RPCServer;
+import lk.ac.mrt.cse.rpc.impl.RPCClientImpl;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ClientImpl;
@@ -25,7 +27,7 @@ public class RegWindow extends JFrame{
     private JButton showLogButton;
     private JButton closeButton;
     public int count = 0;
-
+    private boolean rpc;
 
     String bsIP="";
     String bsPort="";
@@ -33,10 +35,11 @@ public class RegWindow extends JFrame{
     String username="";
     Server server;
 
-    public RegWindow(final Server server) {
-        final ServerLog log = new ServerLog(server);
+    public RegWindow(final Server server, boolean rpc) {
+        final ServerLog log = new ServerLog(server,rpc);
 
         this.server = server;
+        this.rpc = rpc;
         setContentPane(panel1);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(500, 500);
@@ -60,7 +63,11 @@ public class RegWindow extends JFrame{
                     server.setBsIp(bsIP);
                     server.setPort(localPort);
                     server.setUserName(username);
-                    Client client = new ClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
+                    Client client;
+                    if(rpc)
+                        client = new RPCClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
+                    else
+                        client = new ClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
                     server.setClient(client);
 
                     count++;
@@ -100,7 +107,7 @@ public class RegWindow extends JFrame{
         bookSearchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SearchWindow sw = new SearchWindow(server);
+                SearchWindow sw = new SearchWindow(server,rpc);
 
                 sw.setSize(getWidth(),getHeight());
                 sw.setVisible(true);

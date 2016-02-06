@@ -17,8 +17,10 @@ public class ServerLog extends  JFrame implements Observer{
     private JTextArea textArea2;
     private JButton closeButton;
     private Server server;
+    private boolean rpc;
 
-    ServerLog(final Server node){
+    ServerLog(final Server node, boolean rpc){
+        this.rpc = rpc;
         this.server = node;
         setContentPane(panel1);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

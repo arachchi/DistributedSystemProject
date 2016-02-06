@@ -5,9 +5,10 @@ package lk.ac.mrt.cse.system.imp;
 import com.sun.java.accessibility.util.TopLevelWindowMulticaster;
 
 import java.io.PrintStream;*/
-import lk.ac.mrt.cse.system.model.Connection;
+
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
+import lk.ac.mrt.cse.system.model.Connection;
 import lk.ac.mrt.cse.util.Utility;
 
 import java.net.DatagramPacket;
@@ -25,8 +26,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
-
-
     Client client;
 
     private static int BS_Port;
@@ -167,7 +166,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 166");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,6 +182,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         for(Connection con: connections){
             if(con.getIp().equals(SenderIPAddress) && con.getPort().equals(port)){
                 connection=con;
+                break;
             }
         }
         ArrayList<Connection> existingConnections;
@@ -361,7 +360,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void setBS_Port(int BS_Port) {
-        ServerImpl.BS_Port = BS_Port;
+        this.BS_Port = BS_Port;
     }
 
     public String getBsIp() {
@@ -377,7 +376,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void setPort(String port) {
-        ServerImpl.port = port;
+        this.port = port;
     }
 
     public String getNodeIp() {
@@ -385,7 +384,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void setNodeIp(String nodeIp) {
-        ServerImpl.nodeIp = nodeIp;
+        this.nodeIp = nodeIp;
     }
 
     public String getUserName() {
@@ -393,7 +392,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void setUserName(String userName) {
-        ServerImpl.userName = userName;
+        this.userName = userName;
     }
 
     public int getSize() {

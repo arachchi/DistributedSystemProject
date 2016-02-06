@@ -5,7 +5,10 @@ import lk.ac.mrt.cse.system.Server;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -23,11 +26,13 @@ public class AddFile extends JFrame{
     private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
     private int nodeFileCount = 3;
     private Server server;
+    private boolean rpc=true;
 
-    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList) {
+    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList,boolean rpc) {
         this.totalFilesList = totalFilesList;
         this.nodeFileList = nodeFileList;
         this.server = server;
+        this.rpc = rpc;
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -58,7 +63,7 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                RegWindow regWindow = new RegWindow(server);
+                RegWindow regWindow = new RegWindow(server,rpc);
                 regWindow.setLocation(x(), y());
                 regWindow.setVisible(true);
             }
