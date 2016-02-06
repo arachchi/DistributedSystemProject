@@ -49,7 +49,9 @@ public class Client extends Observable {
                     int randomNum;
 
                     for (int i = 0; i < connectingNodeCount; i++) {
-                        randomNum = rand.nextInt((max - min) + 1) + min;
+                        randomNum = rand.nextInt(max);
+                        if(randomNum>=max)
+                            randomNum= max-1;
                         connectingNodesList.add(allNodes.get(randomNum));
                     }
 

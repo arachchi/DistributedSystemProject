@@ -102,18 +102,16 @@ class Node extends Observable implements Serializable {
             DatagramSocket clientSocket = new DatagramSocket();
 
             byte[] sendData;
-            byte[] receiveData = new byte[size];
-
+//            byte[] receiveData = new byte[size];
             sendData = packet.getBytes();
 
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
             clientSocket.send(sendPacket);
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            clientSocket.receive(receivePacket);
-            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
-
+//            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+//            clientSocket.receive(receivePacket);
+//            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
             clientSocket.close();
-            return "RECEIVED:" + modifiedSentence;
+            return "RECEIVED:" ;//+ modifiedSentence;
 
         }catch (Exception e){
             e.printStackTrace();
