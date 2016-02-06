@@ -24,6 +24,16 @@ class Node extends Observable implements Serializable {
     private static String nodeIp;
     private static String userName;
     ArrayList<String> fileList;
+    private ArrayList<Connection> connections;// Routing Table
+
+    public ArrayList<Connection> getConnections() {
+        return connections;
+    }
+
+    public void addConnections(Connection connection) {
+        this.connections.add(connection);
+    }
+
 
 
     public static int getBS_Port() {
@@ -44,6 +54,7 @@ class Node extends Observable implements Serializable {
 
     Node(ArrayList<String> fileList){
         this.fileList = fileList;
+        this.connections=new ArrayList<Connection>();// Routing Table
         getMyIp();
     }
 
@@ -78,9 +89,9 @@ class Node extends Observable implements Serializable {
         // String command;
         boolean registration = registerToServer();
         if(registration){
-            server = new Server(port,fileList);
+            server = new Server(this,port,fileList);
             Thread serverThread = new Thread(server);
-            client = new Client(port,fileList);
+            client = new Client(this,port,fileList);
             serverThread.start();
             return true;
         }else{

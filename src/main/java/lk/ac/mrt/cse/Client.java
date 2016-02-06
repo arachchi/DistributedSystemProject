@@ -18,8 +18,10 @@ public class Client extends Observable {
     private int connectingNodeCount = 2;
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     String consoleMsg;
+    Node node;
 
-    public Client(String port,ArrayList<String> fileList){
+    public Client(Node node,String port,ArrayList<String> fileList){
+        this.node=node;
         this.fileList = fileList;
         this.port = Integer.parseInt(port);
         consoleMsg="";
@@ -73,9 +75,10 @@ public class Client extends Observable {
     }
 
     public void connectToNode(Connection con){
+        //Add connection to routing table
+        node.addConnections(con);
         //Generating packet to send
         String command = " JOIN " + Node.getHostAddress() + " " + Node.getPort();
-
         String packet = Node.getUniversalCommand(command);
         Node.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
@@ -98,22 +101,19 @@ public class Client extends Observable {
             consoleMsg = "The searched keyword is present in my list of files.";
             setChanged();
             notifyObservers();
-
             return "The searched keyword is present in my list of files.";
         }
         else{
+            if(keyword.contains(" ")){//Allows searching for key words with multiple words
+                keyword=keyword.replaceAll(" ","_");
+            }
             String packet = " SER " + keyword + " " + hops + " " + Node.getHostAddress() + " " + port;
-
             String userCommand = Node.getUniversalCommand(packet);
             consoleMsg = Node.sendRequest(userCommand,Node.getHostAddress(),""+port);
             setChanged();
             notifyObservers();
-
             //return Node.sendRequest(userCommand, Node.getHostAddress(),""+port);
             return "Search request is forwarded to the network";
-
-
-
         }
     }
 

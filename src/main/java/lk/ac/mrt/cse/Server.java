@@ -17,18 +17,18 @@ import java.util.*;
  */
 public class Server extends Observable implements Runnable {
     ArrayList<String> fileList;
-    ArrayList<Connection> connections;// Routing Table
+
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
 
-
-    int port=9878;
+    Node node;
+    String port="9878";
     final static int size=1024;
 
-    public Server(String port,ArrayList<String> fileList){
+    public Server(Node node,String port,ArrayList<String> fileList){
+        this.node=node;
         this.fileList = fileList;
-        this.port=Integer.parseInt(port);
-        connections = new ArrayList<Connection>();
+        this.port=port;
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
         consoleMsg="";
 
@@ -37,7 +37,7 @@ public class Server extends Observable implements Runnable {
 
     public void run(){
         try {
-            DatagramSocket serverSocket = new DatagramSocket(port);
+            DatagramSocket serverSocket = new DatagramSocket(Integer.parseInt(port));
             byte[] receiveData = new byte[size];
             byte[] sendData;
 
@@ -88,7 +88,7 @@ public class Server extends Observable implements Runnable {
                 Connection connection = new Connection(message[2],message[3]);//ip , port
 
                 try {
-                    connections.add(connection);
+                    node.addConnections(connection);
                     //Send response to node
                     String packet = "0013 JOINOK 0";
                     Node.sendRequest(packet, message[2], message[3]);
@@ -101,7 +101,7 @@ public class Server extends Observable implements Runnable {
                 //Get the file list of connection for Updating neighbour file list
                 getFileList(connection);
             }
-            else if(message[1].equals("SEARCH")){
+            else if(message[1].equals("SER")){
                 search(message);
             }
             else if(message[1].equals("GETFILES")){
@@ -124,6 +124,7 @@ public class Server extends Observable implements Runnable {
     private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....
         String RequesterIPAddress = message[2];
         String port = message[3];
+        updateNeighbourFileList(message);
 
         //Get IP of localhost
         InetAddress IPAddress = null;
@@ -133,12 +134,17 @@ public class Server extends Observable implements Runnable {
             e.printStackTrace();
         }
 
-        String packet = " FILES " +Node.getHostAddress() + " " +port+" ";
+        String packet = " FILES " +IPAddress.getHostName() + " " +this.port+" ";
+        String filename;
         for(int i=0;i<fileList.size();++i){
+            filename= fileList.get(i);
+            if(filename.contains(" ")){
+                filename=filename.replaceAll(" ","_");
+            }
             if(i!=fileList.size()-1){
-                packet=packet.concat(fileList.get(i)+",");
+                packet=packet.concat(filename+",");
             }else{
-                packet=packet.concat(fileList.get(i));
+                packet=packet.concat(filename);
             }
         }
 
@@ -148,7 +154,7 @@ public class Server extends Observable implements Runnable {
         System.out.println("successfully sent a file list "+userCommand);
     }
 
-    private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
+    private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port requester's_files
         //Request connection file list
         String packet = " GETFILES";
         //Get IP of localhost
@@ -158,40 +164,59 @@ public class Server extends Observable implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        packet=packet.concat(" "+Node.getHostAddress()+" "+port);
+        packet=packet.concat(" "+Node.getHostAddress()+" "+port+" ");
+        //Append my list at the end
+        String filename;
+        for(int i=0;i<fileList.size();++i){
+            filename= fileList.get(i);
+            if(filename.contains(" ")){
+                filename=filename.replaceAll(" ","_");
+            }
+            if(i!=fileList.size()-1){
+                packet=packet.concat(filename+",");
+            }else{
+                packet=packet.concat(filename);
+            }
+        }
         String userCommand = Node.getUniversalCommand(packet);
 
         Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
     }
 
     private void updateNeighbourFileList(String[] message){
-        String SenderIPAddress = message[1];
-        String port = message[2];
+        String SenderIPAddress = message[2];
+        String port = message[3];
+        String filelist=message[4];
         Connection connection=null;
-        for(Connection con: connections){
+
+        for(Connection con: node.getConnections()){
             if(con.getIp().equals(SenderIPAddress) && con.getPort().equals(port)){
                 connection=con;
             }
         }
         ArrayList<Connection> existingConnections;
-        for(int i=3;i<message.length;++i){
-            if(neighbourFileList.containsKey(message[i]) && connection!=null){
-                existingConnections = neighbourFileList.get(message[i]);
+        String[] files=filelist.split(",");
+
+        for(int i=0;i<files.length;++i){
+            if(neighbourFileList.containsKey(files[i]) && connection!=null){
+                existingConnections = neighbourFileList.get(files[i]);
             }else{
                 existingConnections=new ArrayList<Connection>();
             }
             existingConnections.add(connection);
-            neighbourFileList.put(message[i],existingConnections);
+            neighbourFileList.put(files[i],existingConnections);
+            System.out.println("Added to neighbor"+files[i]);
         }
     }
 
-    public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
+    public void search(String[] message){//Search Query is len SER filename no_of_hops searcher's_ip searcher's_port
         //search query runs here
+        String keyword = message[2];
+        System.out.println("searching for key "+message[2]);
 
-        String keyword = message[1];
-        int hops = Integer.parseInt(message[2])-1;
-        String SearcherIPAddress = message[3];
-        String port = message[4];
+        int hops = Integer.parseInt(message[3]);
+        String SearcherIPAddress = message[4];
+        String searcherport = message[5];
 
         String packet = "";
         boolean hasFile = false;//Flags whether this node contains the file
@@ -209,13 +234,15 @@ public class Server extends Observable implements Runnable {
             e.printStackTrace();
         }
 
-        System.out.println("search ip " + SearcherIPAddress );
-        System.out.println("ip address to str " + IPAddress.toString());
-
-        if(SearcherIPAddress.equals(IPAddress.toString())){
+        if(SearcherIPAddress.equals(IPAddress.getHostAddress()) && searcherport.equals(this.port)){
             fromLocalClient=true;
-        }
-        if(!fromLocalClient){
+        }if(!fromLocalClient){
+            hops=hops-1;
+            //Search in my file list
+            if (keyword.contains("_")) {//Convert keyword with multiple words
+                keyword = keyword.replaceAll("_", " ");
+            }
+            System.out.println("searching "+keyword);
             for (String file : fileList) {
                 //If the keyword is contained in the file name as a word or set of words
                 if (file.matches(".*\\b"+keyword+"\\b.*")) {
@@ -225,67 +252,69 @@ public class Server extends Observable implements Runnable {
                 }
             }
         }
-        if(!hasFile){
-            if(connections.isEmpty()){
-                System.out.println("I don't have the file and no more connections. Aborting search.");
-                return;
-            }
-            files= containsKeyWord(neighbourFileList,keyword);
-        }
-
-        if (hasFile) {//this node has the keyword
-
+        if(hasFile){
+            //send search ok
             packet = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
-
             String userCommand = Node.getUniversalCommand(packet);
-
-            Node.sendRequest(userCommand,SearcherIPAddress,port);
+            Node.sendRequest(userCommand,SearcherIPAddress,searcherport);
         }
-        else if (!files.isEmpty()) {//neighbour nodes have the keyword
-
-            for(String file: files){
-                ArrayList<Connection> connections = neighbourFileList.get(file);
-                if(!connections.isEmpty()){
-                    for(Connection connection:connections ){
-                        //Only sends search query to one mapping neighbour if there are many
-                        packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-                        String userCommand = Node.getUniversalCommand(packet);
-                        Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
-                        break;
-                    }
-
-                }
-
+        if(fromLocalClient | !hasFile){
+            System.out.println("Should be forwarded");
+            //Send to neighbours if they have
+            //else send to the connections
+            if (keyword.contains(" ")) {//Convert keyword with multiple words
+                keyword = keyword.replaceAll(" ", "_");
             }
-        } else { //otherwise
-            if (hops > 1) {
-                //number of hops should be checked at the server side by reading search message request
-                //and only forward to client if not expired
-                //forward the message if not expired
+            System.out.println(keyword);
+            //check if neighbours have
+            files= containsKeyWord(keyword);
 
+            //If neighbour has send req to that node
+            if(!files.isEmpty()){
+                for(String file: files){
+                    ArrayList<Connection> connections = neighbourFileList.get(file);
+                    System.out.println("node has "+connections.size());
+                    if(!connections.isEmpty()){
+                        for(Connection connection:connections ){
+                            //Only sends search query to one mapping neighbour if there are many
+                            packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " + searcherport ;
+                            String userCommand = Node.getUniversalCommand(packet);
+                            Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
+                            break;
+                        }
+                    }
+                }
+            }else{
+                //else send to connections
+                if (hops > 1) {
+                    ArrayList<Connection> connections=node.getConnections();
                     Collections.sort(connections,new CustomComparator());
-
                     for (Connection connection : connections) {
                         String IP = connection.getIp();
                         String connectionPort = connection.getPort();
                         packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-
                         String userCommand = Node.getUniversalCommand(packet);
                         Node.sendRequest(userCommand,IP,connectionPort);
                     }
-
-
+                }else{
+                    System.out.println("Number of hops has expired for search. Aborting due to that!");
+                }
             }
+
+
         }
+
 
     }
 
-    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
+    private ArrayList<String> containsKeyWord(String keyword){
+        System.out.println("checking if neighbors contain key");
         ArrayList<String> files=new ArrayList<String>();
         Set<String> keys = neighbourFileList.keySet();
         for(String key :keys){
             if(key.matches(".*\\b"+keyword+"\\b.*")){
                 files.add(key);
+                System.out.println("there is a match in neighbors");
             }
         }
         return  files;
