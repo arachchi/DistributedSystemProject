@@ -96,8 +96,10 @@ public class AddFile extends JFrame{
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                nodeFileList.add(textField1.getText());
-                totalFilesList.add(textField1.getText());
+                String newFile = textField1.getText();
+                nodeFileList.add(newFile);
+                totalFilesList.add(newFile);
+                writeList(newFile);
                 displayList(nodeFileList);
             }
         });
@@ -108,16 +110,9 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                ///private
-
-                writeList();
-
                 RegWindow regWindow = new RegWindow(node);
                 regWindow.setLocation(x(),y());
                 regWindow.setVisible(true);
-
-
-
             }
         });
         closeButton.addActionListener(new ActionListener() {
@@ -143,21 +138,14 @@ public class AddFile extends JFrame{
     }
 
 
-    private void writeList(){
-
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(RESOURCE_FILE_PATH);
-        } catch (FileNotFoundException e) {
+    private void writeList(String newFile){
+        try{
+            PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(RESOURCE_FILE_PATH, true)));
+            out1.println(newFile);
+            out1.close();
+        }catch (IOException e) {
             e.printStackTrace();
         }
-
-        for(String line : totalFilesList){
-            writer.append(line+"\n");
-        }
-
-        writer.close();
-
     }
 
     private void close(){
