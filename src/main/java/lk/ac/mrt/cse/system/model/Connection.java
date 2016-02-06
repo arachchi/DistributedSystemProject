@@ -1,4 +1,4 @@
-package lk.ac.mrt.cse;
+package lk.ac.mrt.cse.system.model;
 
 /**
  * @author nuran

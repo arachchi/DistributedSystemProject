@@ -1,142 +1,142 @@
-package lk.ac.mrt.cse;
+package lk.ac.mrt.cse.system.imp;
 
 
-import java.io.*;
-import java.net.*;
+import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.system.Client;
+import lk.ac.mrt.cse.util.Utility;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Observable;
+import java.util.Random;
 
 /**
  * @author nuran
  * @version 1.0.
- * @since 1/4/16
+ * @since 1/8/16
  */
-class Node extends Observable implements Serializable {
-    private static InetAddress myIp;
-    private static int BSServerPort = 1026;
-    private static String ip = "127.0.0.1";
-    private static  int size=1024;
+public class ClientImpl extends Observable implements Client {
+    int hops=5;
+    private ArrayList<String> fileList;
+    private int connectingNodeCount = 2;
+    private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
+    private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+    private String consoleMsg;
 
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
     private static String nodeIp;
     private static String userName;
-    ArrayList<String> fileList;
-
-
-    public static int getBS_Port() {
-        return BS_Port;
-    }
-
-    public static String getBsIp() {
-        return BS_IP;
-    }
-
-    public static String getNodeIp() {
-        return nodeIp;
-    }
-
-    public static String getPort() {
-        return port;
-    }
-
-    Node(ArrayList<String> fileList){
-        this.fileList = fileList;
-        getMyIp();
-    }
-
-    private static ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
-
-    public static void setBS_Port(int BS_Port) {
-        Node.BS_Port = BS_Port;
-    }
-
-    public static void setBsIp(String bsIp) {
-        BS_IP = bsIp;
-    }
-
-    public static void setPort(String port) {
-        Node.port = port;
-    }
-
-    public static void setNodeListbyBS(ArrayList<Connection> nodeListbyBS) {
-        Node.nodeListbyBS = nodeListbyBS;
-    }
-
-    public static void setUserName(String userName) {
-        Node.userName = userName;
-    }
-
     private static String status;
-    public String getStaus(){return status;}
-    Server server;
-    Client client;
 
-    public boolean execute(){
-        // String command;
-        boolean registration = registerToServer();
-        if(registration){
-            server = new Server(port,fileList);
-            Thread serverThread = new Thread(server);
-            client = new Client(port,fileList);
-            serverThread.start();
-            return true;
-        }else{
-            return false;
-        }
-
+    public ClientImpl(ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
+        this.fileList = fileList;
+        this.port = port;
+        this.BS_IP = BS_IP;
+        this.BS_Port = BS_Port;
+        this.userName = userName;
+        consoleMsg="";
     }
-    public static String sendRequest(String packet,String ip,String port){
+
+
+    public void init(){
+        System.out.println("In init");
+        consoleMsg = "In Init";
+        setChanged();
+        notifyObservers(consoleMsg);
         try {
-            InetAddress IPAddress = InetAddress.getByName(ip);
-            return sendRequest(packet,IPAddress,port);
-        }catch (Exception e){
+
+            //Select two nodes to connect
+            int min, max = nodeListbyBS.size();
+
+            if(max >0) {
+
+                //Connect to only two selected random nodes
+                if (nodeListbyBS.size() > 3) {
+                    min = 1;
+
+                    //Get random numbers
+                    Random rand = new Random();
+                    int randomNum;
+
+                    for (int i = 0; i < connectingNodeCount; i++) {
+                        randomNum = rand.nextInt(max);
+                        if(randomNum>=max)
+                            randomNum= max-1;
+                        connectingNodesList.add(nodeListbyBS.get(randomNum));
+                    }
+
+                    //Connect to the selected nodes
+                    for (int i = 0; i < connectingNodesList.size(); i++) {
+                        connectToNode(connectingNodesList.get(i));
+                    }
+
+                } else { //Connect to all nodes in the list
+                    for( int i =0; i < nodeListbyBS.size(); i++){
+                        connectToNode(nodeListbyBS.get(i));
+                    }
+                }
+            }
+
+        } catch (Exception e){
             e.printStackTrace();
-            return "Error";
-        }
-    }
-    public static String sendRequest(String packet,InetAddress IPAddress,String port){
-        try {
-            DatagramSocket clientSocket = new DatagramSocket();
-
-            byte[] sendData;
-//            byte[] receiveData = new byte[size];
-            sendData = packet.getBytes();
-
-            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
-            clientSocket.send(sendPacket);
-//            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-//            clientSocket.receive(receivePacket);
-//            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            clientSocket.close();
-            return "RECEIVED:" ;//+ modifiedSentence;
-
-        }catch (Exception e){
-            e.printStackTrace();
-            return "Error";
         }
     }
 
-    public static String getUniversalCommand(String command){
+    public void connectToNode(Connection con){
+        //Generating packet to send
+        String command = " JOIN " + Utility.getHostAddress() + " " + port;
 
-        String length= String.format("%04d", command.length() + 4); //Length is always represented as 4 digits
-        command = length.concat(command);
-        /*int fullLength = command.length() + 4;
-
-        String fullLengthStr = "";
-        for(int i=0; i < 4 - Integer.toString(fullLength).length() ; i++){
-            fullLengthStr +=  "0";
-        }
-        fullLengthStr += Integer.toString(fullLength);
-
-        String userCommand = fullLengthStr + command;*/
-
-        return command;
+        String packet = Utility.getUniversalCommand(command);
+        Utility.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
 
-    public static boolean registerToServer(){
+    public String search(String keyword){
+
+        boolean hasBook = false;//Flags whether this node contains the file
+        String searchResults = "";//search results
+        int no_files = 0;//no of search results
+
+        for (String file : fileList) {
+            //If the keyword is contained in the file name as a word or set of words
+            if (file.matches(".*\\b"+keyword+"\\b.*")) {
+                hasBook = true;
+                searchResults += " " + file ;
+                no_files++;
+            }
+        }
+        if(hasBook){
+            consoleMsg = "The searched keyword is present in my list of files.";
+            setChanged();
+            notifyObservers();
+
+            return "The searched keyword is present in my list of files.";
+        }
+        else{
+            String packet = " SER " + keyword + " " + hops + " " + Utility.getHostAddress() + " " + port;
+
+            String userCommand = Utility.getUniversalCommand(packet);
+            consoleMsg = "Search request is forwarded to the network";
+            setChanged();
+            notifyObservers();
+
+            //return Node.sendRequest(userCommand, Node.getHostAddress(),""+port);
+            return userCommand;
+        }
+    }
+
+    public String getConsoleMsg() {
+        return consoleMsg;
+    }
+
+    public boolean registerToServer(){
         //Connect to the bootstrap server and get the list of nodes
         //send these list of nodes to the server instance
         //if you cannot connect to the server using the user name and the password, ask a port and other details again
@@ -149,14 +149,15 @@ class Node extends Observable implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = Node.getIp();
+            InetAddress IP = Utility.getMyIp();
+            System.out.println("I am clientImpl 151");
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
             String command = " REG " + ipAddress + " " + port + " " + userName;
 
-            String userCommand = getUniversalCommand(command);
-
+            String userCommand = Utility.getUniversalCommand(command);
+            System.out.println("BS_IP "+BS_IP+" port "+BS_Port);
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
@@ -229,7 +230,7 @@ class Node extends Observable implements Serializable {
         return registered;
     }
 
-    public static boolean unRegisterToServer(){
+    public boolean unRegisterToServer(){
         //Connect to the bootstrap server and unregister from the BS
         //send these list of nodes to the server instance
         //if you cannot connect to the server using the user name and the password, ask a port and other details again
@@ -242,7 +243,8 @@ class Node extends Observable implements Serializable {
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
-            InetAddress IP = Node.getIp();
+            InetAddress IP = Utility.getMyIp();
+            System.out.println("I am clientImpl 245");
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -308,7 +310,7 @@ class Node extends Observable implements Serializable {
             System.out.println("Successfully Registered");
             status = "Successfully Registered";
 
-            for(Connection con : nodeListbyBS){
+            for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
@@ -320,44 +322,4 @@ class Node extends Observable implements Serializable {
         return registered;
     }
 
-    public static void getMyIp(){
-        try {
-            for (final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces( );interfaces.hasMoreElements( ); )
-            {
-                final NetworkInterface cur = interfaces.nextElement( );
-                if ( cur.isLoopback( ) ) continue;
-                System.out.println( "interface " + cur.getName( ) );
-                for ( final InterfaceAddress addr : cur.getInterfaceAddresses( ) ) {
-
-                    myIp = addr.getAddress( );
-                    if ( !( myIp instanceof Inet4Address) ) continue;
-
-                    System.out.println("  address: " + myIp.getHostAddress() +"/" + addr.getNetworkPrefixLength());
-                    System.out.println("  broadcast address: " +addr.getBroadcast( ).getHostAddress( ));
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            try {
-                if (myIp == null) {
-                    myIp = InetAddress.getLocalHost();
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static InetAddress getIp(){
-        return myIp;
-    }
-
-    public static String getHostAddress(){
-        return myIp.getHostAddress();
-    }
-
-    public static ArrayList<Connection> getNodeListbyBS() {
-        return nodeListbyBS;
-    }
 }

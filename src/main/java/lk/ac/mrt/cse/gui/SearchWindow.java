@@ -1,4 +1,6 @@
-package lk.ac.mrt.cse;
+package lk.ac.mrt.cse.gui;
+
+import lk.ac.mrt.cse.system.Server;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -14,7 +16,7 @@ public class SearchWindow extends  JFrame{
     private JPanel panel1;
     private JButton closeButton;
 
-    public SearchWindow(final Client client) {
+    public SearchWindow(final Server server) {
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -24,7 +26,7 @@ public class SearchWindow extends  JFrame{
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String status = client.search(textField1.getText());
+                String status = server.search(textField1.getText());
                 StatusLabel.setText(status);
             }
         });

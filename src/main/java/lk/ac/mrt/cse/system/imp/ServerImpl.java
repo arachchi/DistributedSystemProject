@@ -1,10 +1,15 @@
-package lk.ac.mrt.cse;
+package lk.ac.mrt.cse.system.imp;
 
 /*import com.sun.org.apache.xpath.internal.SourceTree;
 
 import com.sun.java.accessibility.util.TopLevelWindowMulticaster;
 
 import java.io.PrintStream;*/
+import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.system.Client;
+import lk.ac.mrt.cse.system.Server;
+import lk.ac.mrt.cse.util.Utility;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,29 +20,35 @@ import java.util.*;
  * @version 1.0.
  * @since 1/8/16
  */
-public class Server extends Observable implements Runnable {
+public class ServerImpl extends Observable implements Runnable,Server {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
 
 
-    int port=9878;
+    Client client;
+
+    private static int BS_Port;
+    private static String BS_IP;
+    private static String port;
+    private static String nodeIp;
+    private static String userName;
     final static int size=1024;
 
-    public Server(String port,ArrayList<String> fileList){
+    public ServerImpl(ArrayList<String> fileList){
         this.fileList = fileList;
-        this.port=Integer.parseInt(port);
         connections = new ArrayList<Connection>();
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
         consoleMsg="";
-
     }
 
 
     public void run(){
         try {
-            DatagramSocket serverSocket = new DatagramSocket(port);
+            System.out.println("port is "+ port);
+            //client = new ClientImpl(fileList,port,BS_IP,BS_Port,userName);
+            DatagramSocket serverSocket = new DatagramSocket(Integer.parseInt(port));
             byte[] receiveData = new byte[size];
             byte[] sendData;
 
@@ -91,11 +102,11 @@ public class Server extends Observable implements Runnable {
                     connections.add(connection);
                     //Send response to node
                     String packet = "0013 JOINOK 0";
-                    Node.sendRequest(packet, message[2], message[3]);
+                    Utility.sendRequest(packet, message[2], message[3]);
                 }
                 catch(Exception ex){
                     String packet = "0016 JOINOK 9999";
-                    Node.sendRequest(packet, message[2], message[3]);
+                    Utility.sendRequest(packet, message[2], message[3]);
                 }
 
                 //Get the file list of connection for Updating neighbour file list
@@ -117,7 +128,7 @@ public class Server extends Observable implements Runnable {
         }else{
             //Send response of failure to node
             String packet = "0010 ERROR";
-            Node.sendRequest(packet, message[2], message[3]);
+            Utility.sendRequest(packet, message[2], message[3]);
         }
     }
 
@@ -128,12 +139,13 @@ public class Server extends Observable implements Runnable {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = Node.getIp();
+            IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 140");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        String packet = " FILES " +Node.getHostAddress() + " " +port+" ";
+        String packet = " FILES " + Utility.getHostAddress(IPAddress) + " " +port+" ";
         for(int i=0;i<fileList.size();++i){
             if(i!=fileList.size()-1){
                 packet=packet.concat(fileList.get(i)+",");
@@ -142,10 +154,10 @@ public class Server extends Observable implements Runnable {
             }
         }
 
-        String userCommand = Node.getUniversalCommand(packet);
+        String userCommand = Utility.getUniversalCommand(packet);
         System.out.println("Trying to send a file list "+userCommand);
-        Node.sendRequest(userCommand,RequesterIPAddress,port);
-        System.out.println("successfully sent a file list "+userCommand);
+        Utility.sendRequest(userCommand, RequesterIPAddress, port);
+        System.out.println("successfully sent a file list " + userCommand);
     }
 
     private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
@@ -154,14 +166,15 @@ public class Server extends Observable implements Runnable {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = Node.getIp();
+            IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 166");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        packet=packet.concat(" "+Node.getHostAddress()+" "+port);
-        String userCommand = Node.getUniversalCommand(packet);
+        packet=packet.concat(" "+ Utility.getHostAddress(IPAddress)+" "+port);
+        String userCommand = Utility.getUniversalCommand(packet);
 
-        Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
+        Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
     }
 
     private void updateNeighbourFileList(String[] message){
@@ -185,9 +198,7 @@ public class Server extends Observable implements Runnable {
         }
     }
 
-    public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port
-        //search query runs here
-
+    public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port//search query runs here
         String keyword = message[1];
         int hops = Integer.parseInt(message[2])-1;
         String SearcherIPAddress = message[3];
@@ -204,7 +215,8 @@ public class Server extends Observable implements Runnable {
         //Get IP of localhost
         InetAddress IPAddress = null;
         try {
-            IPAddress = Node.getIp();
+            IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 216");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -237,9 +249,9 @@ public class Server extends Observable implements Runnable {
 
             packet = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
 
-            String userCommand = Node.getUniversalCommand(packet);
+            String userCommand = Utility.getUniversalCommand(packet);
 
-            Node.sendRequest(userCommand,SearcherIPAddress,port);
+            Utility.sendRequest(userCommand, SearcherIPAddress, port);
         }
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
@@ -249,8 +261,8 @@ public class Server extends Observable implements Runnable {
                     for(Connection connection:connections ){
                         //Only sends search query to one mapping neighbour if there are many
                         packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-                        String userCommand = Node.getUniversalCommand(packet);
-                        Node.sendRequest(userCommand,connection.getIp(),connection.getPort());
+                        String userCommand = Utility.getUniversalCommand(packet);
+                        Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
                         break;
                     }
 
@@ -270,14 +282,42 @@ public class Server extends Observable implements Runnable {
                         String connectionPort = connection.getPort();
                         packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
 
-                        String userCommand = Node.getUniversalCommand(packet);
-                        Node.sendRequest(userCommand,IP,connectionPort);
+                        String userCommand = Utility.getUniversalCommand(packet);
+                        Utility.sendRequest(userCommand, IP, connectionPort);
                     }
 
 
             }
         }
 
+    }
+
+    public String search(String message){
+        String packet = client.search(message);
+        if(packet.equals("The searched keyword is present in my list of files."))
+            return "The searched keyword is present in my list of files.";
+        else{
+            String[] mes = packet.substring(9).split(" ");
+//            for(String a: packet)
+//                System.out.println(a);
+            search(mes);
+        }
+        return "Search request is forwarded to the network";
+    }
+
+    @Override
+    public void addClientObserver(Observer observer) {
+        getClient().addObserver(observer);
+    }
+
+    @Override
+    public boolean unRegisterToServer() {
+        return getClient().unRegisterToServer();
+    }
+
+    @Override
+    public void joinNetwork() {
+        getClient().init();
     }
 
     private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
@@ -289,6 +329,79 @@ public class Server extends Observable implements Runnable {
             }
         }
         return  files;
+    }
+
+    public String getConsoleMsg() {
+        return consoleMsg;
+    }
+
+    public String getClientConsoleMsg(){
+        return getClient().getConsoleMsg();
+    }
+
+    @Override
+    public boolean registerToServer() {
+        return getClient().registerToServer();
+    }
+
+    public void setConsoleMsg(String consoleMsg) {
+        this.consoleMsg = consoleMsg;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public int getBS_Port() {
+        return BS_Port;
+    }
+
+    public void setBS_Port(int BS_Port) {
+        ServerImpl.BS_Port = BS_Port;
+    }
+
+    public String getBsIp() {
+        return BS_IP;
+    }
+
+    public void setBsIp(String bsIp) {
+        BS_IP = bsIp;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        ServerImpl.port = port;
+    }
+
+    public String getNodeIp() {
+        return nodeIp;
+    }
+
+    public void setNodeIp(String nodeIp) {
+        ServerImpl.nodeIp = nodeIp;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        ServerImpl.userName = userName;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public ArrayList<String> getFileList() {
+        return fileList;
     }
 }
 
