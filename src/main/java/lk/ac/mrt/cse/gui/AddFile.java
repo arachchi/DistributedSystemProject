@@ -28,7 +28,7 @@ public class AddFile extends JFrame{
     private Server server;
     private boolean rpc=true;
 
-    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList,boolean rpc) {
+    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList,final boolean rpc) {
         this.totalFilesList = totalFilesList;
         this.nodeFileList = nodeFileList;
         this.server = server;

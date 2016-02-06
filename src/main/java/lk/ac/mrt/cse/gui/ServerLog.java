@@ -19,7 +19,7 @@ public class ServerLog extends  JFrame implements Observer{
     private Server server;
     private boolean rpc;
 
-    ServerLog(final Server node, boolean rpc){
+    ServerLog(final Server node,final boolean rpc){
         this.rpc = rpc;
         this.server = node;
         setContentPane(panel1);
