@@ -114,6 +114,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 getFileList(connection);
             }
             else if(message[1].equals("SER")){
+                //String[] content = {message[2],message[3],message[4],message[5]};
                 search(message);
             }
             else if(message[1].equals("GETFILES")){
@@ -208,6 +209,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         System.out.println("Search String finished.");
         String keyword = message[0];
         int hops = Integer.parseInt(message[1])-1;//TODO: Number format exception
+        if(hops<1) hops = 0;
         String SearcherIPAddress = message[2];
         String port = message[3];
 
@@ -274,7 +276,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                     //Only sends search query to one mapping neighbour if there are many
                     packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
                     String userCommand = Utility.getUniversalCommand(packet);
-                    Utility.sendRequest(userCommand, SearcherIPAddress, port);
+                    Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
                 }
 
             }
