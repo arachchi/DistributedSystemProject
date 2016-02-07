@@ -5,7 +5,7 @@ package lk.ac.mrt.cse.system.imp;
 import com.sun.java.accessibility.util.TopLevelWindowMulticaster;
 
 import java.io.PrintStream;*/
-
+import lk.ac.mrt.cse.system.model.Connection;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.model.Connection;
@@ -26,6 +26,8 @@ public class ServerImpl extends Observable implements Runnable,Server {
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
+
+
     Client client;
 
     private static int BS_Port;
@@ -111,7 +113,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 //Get the file list of connection for Updating neighbour file list
                 getFileList(connection);
             }
-            else if(message[1].equals("SEARCH")){
+            else if(message[1].equals("SER")){
                 search(message);
             }
             else if(message[1].equals("GETFILES")){
@@ -139,6 +141,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 140");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -165,6 +168,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 166");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -175,32 +179,37 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     private void updateNeighbourFileList(String[] message){
-        String SenderIPAddress = message[1];
-        String port = message[2];
-        Connection connection=null;
-        for(Connection con: connections){
-            if(con.getIp().equals(SenderIPAddress) && con.getPort().equals(port)){
-                connection=con;
-                break;
-            }
-        }
+        String senderIPAddress = message[2];
+        String port = message[3];
+        Connection connection=new Connection(senderIPAddress,port);
+
+        for(String a:message)
+            System.out.println(a);
+        System.out.println("iwarai;");
+
         ArrayList<Connection> existingConnections;
-        for(int i=3;i<message.length;++i){
-            if(neighbourFileList.containsKey(message[i]) && connection!=null){
-                existingConnections = neighbourFileList.get(message[i]);
+        String fileNamesString = message[4];
+        String[] fileNames = fileNamesString.split(",");
+        for(String fileName: fileNames){
+            if(neighbourFileList.containsKey(fileName) && connection!=null){
+                existingConnections = neighbourFileList.get(fileName);
             }else{
                 existingConnections=new ArrayList<Connection>();
             }
             existingConnections.add(connection);
-            neighbourFileList.put(message[i],existingConnections);
+            neighbourFileList.put(fileName,existingConnections);
         }
     }
 
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port//search query runs here
-        String keyword = message[1];
-        int hops = Integer.parseInt(message[2])-1;
-        String SearcherIPAddress = message[3];
-        String port = message[4];
+        System.out.println("Search String");
+        for(String a:message)
+            System.out.println(a);
+        System.out.println("Search String finished.");
+        String keyword = message[0];
+        int hops = Integer.parseInt(message[1])-1;//TODO: Number format exception
+        String SearcherIPAddress = message[2];
+        String port = message[3];
 
         String packet = "";
         boolean hasFile = false;//Flags whether this node contains the file
@@ -214,6 +223,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
+            System.out.println("I am serverImpl 216");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -255,14 +265,16 @@ public class ServerImpl extends Observable implements Runnable,Server {
             for(String file: files){
                 ArrayList<Connection> connections = neighbourFileList.get(file);
                 if(!connections.isEmpty()){
-                    for(Connection connection:connections ){
-                        //Only sends search query to one mapping neighbour if there are many
-                        packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
-                        String userCommand = Utility.getUniversalCommand(packet);
-                        Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
-                        break;
+                    for(Connection conn:connections){
+                        if(conn != null){
+                            System.out.println("connection "+ conn.getIp() +" port: "+conn.getPort());
+                        }
                     }
-
+                    Connection connection = connections.get(0);
+                    //Only sends search query to one mapping neighbour if there are many
+                    packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
+                    String userCommand = Utility.getUniversalCommand(packet);
+                    Utility.sendRequest(userCommand, SearcherIPAddress, port);
                 }
 
             }
@@ -358,7 +370,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void setBS_Port(int BS_Port) {
-        this.BS_Port = BS_Port;
+        ServerImpl.BS_Port = BS_Port;
     }
 
     public String getBsIp() {
