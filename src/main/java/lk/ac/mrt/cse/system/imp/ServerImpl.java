@@ -84,6 +84,8 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void requestProcess(String query){
 
+        System.out.println("Server Request: " + query);
+
         consoleMsg = "In requestProcess";
         setChanged();
         notifyObservers();
@@ -111,7 +113,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 //Get the file list of connection for Updating neighbour file list
                 getFileList(connection);
             }
-            else if(message[1].equals("SEARCH")){
+            else if(message[1].equals("SER")){
+                System.out.println("IN Search");
+
+                for(String mess : message){
+                    System.out.println(mess);
+                }
+
                 search(message);
             }
             else if(message[1].equals("GETFILES")){
@@ -185,7 +193,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
         }
         ArrayList<Connection> existingConnections;
-        for(int i=3;i<message.length;++i){
+        for(int i=0;i<message.length;++i){
             if(neighbourFileList.containsKey(message[i]) && connection!=null){
                 existingConnections = neighbourFileList.get(message[i]);
             }else{

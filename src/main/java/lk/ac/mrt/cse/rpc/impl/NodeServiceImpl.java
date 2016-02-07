@@ -250,14 +250,13 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             int hops = Integer.parseInt(mes[1]);
 
             try {
-                search(keyword, requestorIp, requestorPort, hops);
+                return search(keyword, requestorIp, requestorPort, hops);
             } catch (TException e) {
                 e.printStackTrace();
             }
         }
-        return "Search request is forwarded to the network";
 
-
+        return null;
     }
 
     @Override

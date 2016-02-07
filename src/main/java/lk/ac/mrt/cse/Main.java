@@ -21,7 +21,7 @@ public class Main {
     private static ArrayList<String> totalFilesList = new ArrayList<String>();
     private static ArrayList<String> nodeFileList = new ArrayList<String>();
     private static Server server;
-    private static boolean rpc=true;
+    private static boolean rpc=false;
     public static void main(String args[]){
 
         initializeFiles();
