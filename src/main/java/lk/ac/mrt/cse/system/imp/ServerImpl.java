@@ -114,7 +114,10 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 getFileList(connection);
             }
             else if(message[1].equals("SER")){
-                search(message);
+
+                String[] content = {message[2], message[3], message[4], message[5]};
+
+                search(content);
             }
             else if(message[1].equals("GETFILES")){
                 sendFileList(message);
