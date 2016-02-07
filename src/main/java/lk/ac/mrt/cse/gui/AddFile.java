@@ -28,7 +28,7 @@ public class AddFile extends JFrame{
     private Server server;
     private boolean rpc=true;
 
-    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList,final boolean rpc) {
+    public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, boolean rpc) {
         this.totalFilesList = totalFilesList;
         this.nodeFileList = nodeFileList;
         this.server = server;
@@ -63,7 +63,7 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                RegWindow regWindow = new RegWindow(server,rpc);
+                RegWindow regWindow = new RegWindow(server, AddFile.this.rpc);
                 regWindow.setLocation(x(), y());
                 regWindow.setVisible(true);
             }
