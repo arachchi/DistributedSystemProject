@@ -24,14 +24,10 @@ public class Utility {
             DatagramSocket clientSocket = new DatagramSocket();
 
             byte[] sendData;
-//            byte[] receiveData = new byte[size];
             sendData = packet.getBytes();
 
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Integer.parseInt(port));
             clientSocket.send(sendPacket);
-//            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-//            clientSocket.receive(receivePacket);
-//            String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
             clientSocket.close();
             return "RECEIVED:" ;//+ modifiedSentence;
 
@@ -54,14 +50,10 @@ public class Utility {
             {
                 final NetworkInterface cur = interfaces.nextElement( );
                 if ( cur.isLoopback( ) ) continue;
-                System.out.println( "interface " + cur.getName( ) );
                 for ( final InterfaceAddress addr : cur.getInterfaceAddresses( ) ) {
 
                     myIp = addr.getAddress( );
                     if ( !( myIp instanceof Inet4Address) ) continue;
-
-                    System.out.println("  address: " + myIp.getHostAddress() +"/" + addr.getNetworkPrefixLength());
-                    System.out.println("  broadcast address: " +addr.getBroadcast( ).getHostAddress( ));
                 }
             }
         }catch (Exception e){

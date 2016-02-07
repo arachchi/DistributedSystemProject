@@ -5,6 +5,7 @@ import lk.ac.mrt.cse.rpc.RPCServer;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.Utility;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -12,10 +13,8 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Observer;
+import java.net.InetAddress;
+import java.util.*;
 
 /**
  * Created by sabra on 2/6/16.
@@ -56,6 +55,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         }
 
         //Get the file list of connection for Updating neighbour file list
+        System.out.println("get file list implementation");
         getFileList(connection);
         return packet;
     }
@@ -81,7 +81,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             transport.open();
 
             fileList = (ArrayList<String>)client.getFiles();
-
+            System.out.println("inside nodeserviceimpl search done.");
             ArrayList<Connection> existingConnections;
             for(int i=3;i<fileList.size();++i){
                 if(neighbourFileList.containsKey(fileList.get(i)) && connection!=null){
@@ -107,14 +107,127 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         System.out.println("NO RP");
     }
 
+    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
+        ArrayList<String> files=new ArrayList<String>();
+        Set<String> keys = neighbourFileList.keySet();
+        for(String key :keys){
+            if(key.matches(".*\\b"+keyword+"\\b.*")){
+                files.add(key);
+            }
+        }
+        return  files;
+    }
+
+
     @Override
     public void search(String[] message) {
 
+        String keyword = message[1];
+        int hops = Integer.parseInt(message[2])-1;
+        String SearcherIPAddress = message[3];
+        String port = message[4];
+
+        String packet = "";
+        boolean hasFile = false;//Flags whether this node contains the file
+        boolean fromLocalClient=false; //Flags if the request is from the local client
+        ArrayList<String> files=new ArrayList<String>();
+
+        String searchResults = "";//search results
+        int no_files = 0;//no of search results
+
+        //Get IP of localhost
+        InetAddress IPAddress = null;
+        try {
+            IPAddress = Utility.getMyIp();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("search ip " + SearcherIPAddress );
+        System.out.println("ip address to str " + IPAddress.toString());
+
+        if(SearcherIPAddress.equals(IPAddress.toString())){
+            fromLocalClient=true;
+        }
+        if(!fromLocalClient){
+            for (String file : fileList) {
+                //If the keyword is contained in the file name as a word or set of words
+                if (file.matches(".*\\b"+keyword+"\\b.*")) {
+                    hasFile = true;
+                    searchResults += " " + file ;
+                    no_files++;
+                }
+            }
+        }
+        if(!hasFile){
+            if(connections.isEmpty()){
+                System.out.println("I don't have the file and no more connections. Aborting search.");
+                return;
+            }
+            files= containsKeyWord(neighbourFileList,keyword);
+        }
+
+        if (hasFile) {//this node has the keyword
+
+            packet = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
+
+            String userCommand = Utility.getUniversalCommand(packet);
+
+
+
+
+            Utility.sendRequest(userCommand, SearcherIPAddress, port);
+        }
+        else if (!files.isEmpty()) {//neighbour nodes have the keyword
+
+            for(String file: files){
+                ArrayList<Connection> connections = neighbourFileList.get(file);
+                if(!connections.isEmpty()){
+                    for(Connection connection:connections ){
+                        //Only sends search query to one mapping neighbour if there are many
+                        packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
+                        String userCommand = Utility.getUniversalCommand(packet);
+                        Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
+                        break;
+                    }
+
+                }
+
+            }
+        } else { //otherwise
+            if (hops > 1) {
+                //number of hops should be checked at the server side by reading search message request
+                //and only forward to client if not expired
+                //forward the message if not expired
+
+                Collections.sort(connections, new CustomComparator());
+
+                for (Connection connection : connections) {
+                    String IP = connection.getIp();
+                    String connectionPort = connection.getPort();
+                    packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
+
+                    String userCommand = Utility.getUniversalCommand(packet);
+                    Utility.sendRequest(userCommand, IP, connectionPort);
+                }
+
+
+            }
+        }
     }
 
     @Override
-    public String search(String message) {
-        return null;
+    public String search(String message){
+        String packet = client.search(message);
+        if(packet.equals("The searched keyword is present in my list of files."))
+            return "The searched keyword is present in my list of files.";
+        else{
+            String[] mes = packet.substring(9).split(" ");
+//            for(String a: packet)
+//                System.out.println(a);
+            search(mes);
+        }
+        return "Search request is forwarded to the network";
     }
 
     @Override
@@ -129,7 +242,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
     @Override
     public boolean unRegisterToServer() {
-        return false;
+        return getClient().unRegisterToServer();
     }
 
     @Override
@@ -226,6 +339,13 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         RPCServer rpcServer = new RPCServer();
         rpcServer.setPort(port);
         rpcServer.start(fileList);
+    }
+
+    class CustomComparator implements Comparator<Connection> {
+        @Override
+        public int compare(Connection o1, Connection o2) {
+            return Integer.valueOf(o1.getNoOfConnections()).compareTo(o2.getNoOfConnections());
+        }
     }
 }
 

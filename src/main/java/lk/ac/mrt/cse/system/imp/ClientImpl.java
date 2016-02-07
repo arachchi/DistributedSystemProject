@@ -150,7 +150,6 @@ public class ClientImpl extends Observable implements Client {
             //String userName = inFromUser.readLine();
 
             InetAddress IP = Utility.getMyIp();
-            System.out.println("I am clientImpl 151");
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -244,7 +243,6 @@ public class ClientImpl extends Observable implements Client {
             //String userName = inFromUser.readLine();
 
             InetAddress IP = Utility.getMyIp();
-            System.out.println("I am clientImpl 245");
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 

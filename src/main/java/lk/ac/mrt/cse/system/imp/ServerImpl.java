@@ -139,7 +139,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 140");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -215,7 +214,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 216");
         } catch (Exception e) {
             e.printStackTrace();
         }
