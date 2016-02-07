@@ -17,7 +17,7 @@ public class SearchWindow extends  JFrame{
     private JButton closeButton;
     private boolean rpc;
 
-    public SearchWindow(final Server server,boolean rpc) {
+    public SearchWindow(final Server server,final boolean rpc) {
         this.rpc = rpc;
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

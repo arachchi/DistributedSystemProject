@@ -35,7 +35,7 @@ public class RegWindow extends JFrame{
     String username="";
     Server server;
 
-    public RegWindow(final Server server, boolean rpc) {
+    public RegWindow(final Server server,final boolean rpc) {
         final ServerLog log = new ServerLog(server,rpc);
 
         this.server = server;

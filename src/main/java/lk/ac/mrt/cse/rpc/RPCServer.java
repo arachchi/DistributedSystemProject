@@ -23,7 +23,7 @@ public class RPCServer {
 
             TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).
                     processor(processor));
-            System.out.println("Starting server on port 9011 ...");
+            System.out.println("Starting the RPC server on  ...");
             server.serve();
         } catch (TTransportException e) {
             e.printStackTrace();
