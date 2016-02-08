@@ -1,5 +1,7 @@
 package lk.ac.mrt.cse.system;
 
+import lk.ac.mrt.cse.system.model.Connection;
+
 import java.util.ArrayList;
 import java.util.Observer;
 
@@ -44,5 +46,7 @@ public interface Server extends Runnable {
     public void setPort(String port);
 
     public void setUserName(String userName);
+
+    public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes);
 
 }

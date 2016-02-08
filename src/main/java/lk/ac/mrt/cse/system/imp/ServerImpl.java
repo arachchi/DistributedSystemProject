@@ -47,7 +47,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void run(){
         try {
-            System.out.println("port is "+ port);
             //client = new ClientImpl(fileList,port,BS_IP,BS_Port,userName);
             DatagramSocket serverSocket = new DatagramSocket(Integer.parseInt(port));
             byte[] receiveData = new byte[size];
@@ -114,10 +113,8 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 getFileList(connection);
             }
             else if(message[1].equals("SER")){
-
-                String[] content = {message[2], message[3], message[4], message[5]};
-
-                search(content);
+                //String[] content = {message[2],message[3],message[4],message[5]};
+                search(message);
             }
             else if(message[1].equals("GETFILES")){
                 sendFileList(message);
@@ -138,7 +135,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     private void sendFileList(String[] message) { //response to GETFILES : FILES <file1> <file2> ....
         String RequesterIPAddress = message[2];
-        String port = message[3];
+        String requestorPort = message[3];
 
         //Get IP of localhost
         InetAddress IPAddress = null;
@@ -160,7 +157,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
         String userCommand = Utility.getUniversalCommand(packet);
         System.out.println("Trying to send a file list "+userCommand);
-        Utility.sendRequest(userCommand, RequesterIPAddress, port);
+        Utility.sendRequest(userCommand, RequesterIPAddress, requestorPort);
         System.out.println("successfully sent a file list " + userCommand);
     }
 
@@ -205,14 +202,11 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port//search query runs here
-        System.out.println("Search String");
-        for(String a:message)
-            System.out.println(a);
-        System.out.println("Search String finished.");
-        String keyword = message[0];
-        int hops = Integer.parseInt(message[1])-1;//TODO: Number format exception
-        String SearcherIPAddress = message[2];
-        String port = message[3];
+        String keyword = message[2];
+        int hops = Integer.parseInt(message[3])-1;//TODO: Number format exception
+        if(hops<1) hops = 0;
+        String SearcherIPAddress = message[4];
+        String port = message[5];
 
         String packet = "";
         boolean hasFile = false;//Flags whether this node contains the file
@@ -230,9 +224,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("search ip " + SearcherIPAddress );
-        System.out.println("ip address to str " + IPAddress.toString());
 
         if(SearcherIPAddress.equals(IPAddress.toString())){
             fromLocalClient=true;
@@ -277,7 +268,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                     //Only sends search query to one mapping neighbour if there are many
                     packet = " SER " + keyword + " " + hops + " " + SearcherIPAddress + " " +  port;
                     String userCommand = Utility.getUniversalCommand(packet);
-                    Utility.sendRequest(userCommand, SearcherIPAddress, port);
+                    Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
                 }
 
             }
@@ -309,10 +300,11 @@ public class ServerImpl extends Observable implements Runnable,Server {
         if(packet.equals("The searched keyword is present in my list of files."))
             return "The searched keyword is present in my list of files.";
         else{
-            String[] mes = packet.substring(9).split(" ");
+            System.out.println("kdjhcjdk");
+            //String[] mes = packet.substring(9).split(" ");
 //            for(String a: packet)
 //                System.out.println(a);
-            search(mes);
+            search(message);
         }
         return "Search request is forwarded to the network";
     }
@@ -406,6 +398,11 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    @Override
+    public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
+        connections = firstTwoNodes;
     }
 
     public int getSize() {

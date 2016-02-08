@@ -320,4 +320,9 @@ public class ClientImpl extends Observable implements Client {
         return registered;
     }
 
+    @Override
+    public ArrayList<Connection> getConnectedNodes() {
+        return connectingNodesList;
+    }
+
 }

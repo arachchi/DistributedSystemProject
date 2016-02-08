@@ -87,9 +87,14 @@ public class RPCClientImpl extends Observable implements Client {
 
                 } else { //Connect to all nodes in the list
                     for( int i =0; i < nodeListbyBS.size(); i++){
+                        connectingNodesList.add(nodeListbyBS.get(i));
                         connectToNode(nodeListbyBS.get(i));
                     }
                 }
+            }
+
+            for(Connection con: connectingNodesList){
+                System.out.println("init " + con);
             }
 
         } catch (Exception e){
@@ -340,6 +345,15 @@ public class RPCClientImpl extends Observable implements Client {
         }
 
         return registered;
+    }
+
+    @Override
+    public ArrayList<Connection> getConnectedNodes() {
+
+        for(Connection con: connectingNodesList){
+            System.out.println("getConnectedNodes " + con);
+        }
+        return connectingNodesList;
     }
 
 }

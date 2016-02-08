@@ -15,6 +15,7 @@ import org.apache.thrift.transport.TTransportException;
 
 import java.net.InetAddress;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sabra on 2/6/16.
@@ -70,7 +71,10 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     @Override
     public String search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
 
+        connections.addAll(client.getConnectedNodes().stream().collect(Collectors.toList()));
+
         String response = null;
+        if(hops<1) hops = 0;
 
         boolean hasFile = false;//Flags whether this node contains the file
         boolean fromLocalClient=false; //Flags if the request is from the local client
@@ -117,27 +121,25 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             for(String file: files){
                 ArrayList<Connection> connections = neighbourFileList.get(file);
                 if(!connections.isEmpty()){
-                    for(Connection connection:connections ){
-                        //Only sends search query to one mapping neighbour if there are many
-                        TTransport transport;
-                        try {
-                            transport = new TSocket(connection.getIp(), Integer.parseInt(connection.getPort()));
 
-                            TProtocol protocol = new TBinaryProtocol(transport);
+                    Connection connection = connections.get(0);
+                    //Only sends search query to one mapping neighbour if there are many
+                    TTransport transport;
+                    try {
+                        transport = new TSocket(connection.getIp(), Integer.parseInt(connection.getPort()));
 
-                            NodeService.Client client = new NodeService.Client(protocol);
-                            transport.open();
+                        TProtocol protocol = new TBinaryProtocol(transport);
 
-                            response = client.search(keyWord,requestorIP,requestorPort,hops);
+                        NodeService.Client client = new NodeService.Client(protocol);
+                        transport.open();
 
-                            transport.close();
-                        } catch (TTransportException e) {
-                            e.printStackTrace();
-                        } catch (TException e) {
-                            e.printStackTrace();
-                        }
+                        response = client.search(keyWord,requestorIP,requestorPort,hops);
 
-                        break;
+                        transport.close();
+                    } catch (TTransportException e) {
+                        e.printStackTrace();
+                    } catch (TException e) {
+                        e.printStackTrace();
                     }
 
                 }
@@ -342,6 +344,15 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    @Override
+    public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
+        connections = firstTwoNodes;
+
+        for(Connection con: connections){
+            System.out.println(con);
+        }
     }
 
     public int getSize() {

@@ -5,10 +5,12 @@ import lk.ac.mrt.cse.rpc.impl.RPCClientImpl;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ClientImpl;
+import lk.ac.mrt.cse.system.model.Connection;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 /**
  * Created by kulakshi on 1/19/16.
@@ -53,7 +55,7 @@ public class RegWindow extends JFrame{
                 int i=8;
                 System.out.println("testing initiated.");
                 if(connectButton.getText()=="Register") {
-                    System.out.println(textField1);
+
                     bsIP = textField1.getText();
                     bsPort = textField4.getText();
                     localPort = textField3.getText();
@@ -70,12 +72,10 @@ public class RegWindow extends JFrame{
                         client = new ClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
                     server.setClient(client);
 
-                    count++;
-                    System.out.println("count value is "+count);
-
                     boolean registered = false;
 
                     registered = server.registerToServer();
+
                     if(registered){
                         Thread serverThread = new Thread(server);
                         serverThread.start();
@@ -98,10 +98,18 @@ public class RegWindow extends JFrame{
                 }
             }
         });
+
         joinWithNetworkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 server.joinNetwork();
+                ArrayList<Connection> con = server.getClient().getConnectedNodes();
+
+                for(Connection conn: con ){
+                    System.out.println(conn);
+                }
+
+                server.setConnectedNodesList(con);
             }
         });
         bookSearchButton.addActionListener(new ActionListener() {
