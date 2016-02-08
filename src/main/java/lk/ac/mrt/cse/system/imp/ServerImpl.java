@@ -114,6 +114,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
             else if(message[1].equals("SER")){
                 //String[] content = {message[2],message[3],message[4],message[5]};
+                System.out.println("SER  "+message);
                 search(message);
             }
             else if(message[1].equals("GETFILES")){

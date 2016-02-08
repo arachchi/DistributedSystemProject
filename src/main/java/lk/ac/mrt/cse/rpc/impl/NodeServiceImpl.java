@@ -71,7 +71,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     @Override
     public String search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
 
-        connections.addAll(client.getConnectedNodes().stream().collect(Collectors.toList()));
+        //connections.addAll(client.getConnectedNodes().stream().collect(Collectors.toList()));
 
         String response = null;
         if(hops<1) hops = 0;
@@ -207,6 +207,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             transport.open();
 
             fileList = (ArrayList<String>)client.getFiles();
+
+            System.out.println(fileList.size());
 
             ArrayList<Connection> existingConnections;
             for(int i=3;i<fileList.size();++i){

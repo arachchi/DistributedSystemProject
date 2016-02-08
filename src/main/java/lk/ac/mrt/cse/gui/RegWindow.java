@@ -21,6 +21,7 @@ public class RegWindow extends JFrame{
     private JTextField textField3;
     private JTextField textField4;
     private JButton connectButton;
+    private JCheckBox selectRPCCheckBox;
     JPanel panel1;
     private JLabel statusLabel;
     private JButton joinWithNetworkButton;
@@ -47,7 +48,13 @@ public class RegWindow extends JFrame{
         setSize(500, 500);
         setTitle("Client : Connect with Network");
         joinWithNetworkButton.setEnabled(false);
+        selectRPCCheckBox.setEnabled(false);
 
+        if(rpc){
+            selectRPCCheckBox.setSelected(true);
+        }else{
+            selectRPCCheckBox.setSelected(false);
+        }
 
         connectButton.addActionListener(new ActionListener() {
             @Override
@@ -139,7 +146,5 @@ public class RegWindow extends JFrame{
     private void close(){
         System.exit(0);
     }
-
-
 
 }

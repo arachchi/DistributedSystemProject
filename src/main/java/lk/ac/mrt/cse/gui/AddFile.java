@@ -21,6 +21,7 @@ public class AddFile extends JFrame{
     private JTextPane textPane1;
     private JButton nextButton;
     private JButton closeButton;
+    private JCheckBox addRPCCheckBox;
     ArrayList<String> totalFilesList;
     private static ArrayList<String> nodeFileList;
     private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
@@ -28,7 +29,7 @@ public class AddFile extends JFrame{
     private Server server;
     private boolean rpc=true;
 
-    public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, boolean rpc) {
+    public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, final boolean rpc) {
         this.totalFilesList = totalFilesList;
         this.nodeFileList = nodeFileList;
         this.server = server;
@@ -42,6 +43,13 @@ public class AddFile extends JFrame{
         //pack();
         setTitle("Client : Add New Files");
 
+        if(rpc){
+            addRPCCheckBox.setSelected(true);
+        }else{
+            addRPCCheckBox.setSelected(false);
+        }
+
+
         if(nodeFileList.size()<1){
             textPane1.setText("No files are added yet..");
         }else{
@@ -52,10 +60,6 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newFile = textField1.getText();
-                nodeFileList.add(newFile);
-                totalFilesList.add(newFile);
-                writeList(newFile);
-                displayList(nodeFileList);
             }
         });
 
@@ -74,6 +78,16 @@ public class AddFile extends JFrame{
                 close();
             }
         });
+        addRPCCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(addRPCCheckBox.isSelected()){
+                     setRpc(true);
+                }else{
+                    setRpc(false);
+                }
+            }
+        });
     }
     private int x(){
         return getX();
@@ -81,6 +95,7 @@ public class AddFile extends JFrame{
     private int y(){
         return getY();
     }
+    private void setRpc(boolean rpc){this.rpc = rpc;}
 
     private void displayList(ArrayList<String> fileList){
         String list = "";
