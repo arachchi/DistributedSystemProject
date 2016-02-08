@@ -3,6 +3,7 @@ package lk.ac.mrt.cse.system.imp;
 
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Utility;
 
 import java.io.BufferedReader;
@@ -28,6 +29,7 @@ public class ClientImpl extends Observable implements Client {
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private String consoleMsg;
+    ConnectionTable routingTable;
 
     private static int BS_Port;
     private static String BS_IP;
@@ -36,7 +38,8 @@ public class ClientImpl extends Observable implements Client {
     private static String userName;
     private static String status;
 
-    public ClientImpl(ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
+    public ClientImpl(ConnectionTable routingTable,ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
+        this.routingTable=routingTable;
         this.fileList = fileList;
         this.port = port;
         this.BS_IP = BS_IP;
@@ -91,6 +94,7 @@ public class ClientImpl extends Observable implements Client {
     }
 
     public void connectToNode(Connection con){
+        this.routingTable.addConnections(con);
         //Generating packet to send
         String command = " JOIN " + Utility.getHostAddress() + " " + port;
 
