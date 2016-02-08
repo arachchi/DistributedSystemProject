@@ -191,6 +191,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         String userCommand = Utility.getUniversalCommand(packet);
 
         Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
+
     }
 
     private void updateNeighbourFileList(String[] message){
