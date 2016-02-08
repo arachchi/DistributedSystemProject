@@ -1,6 +1,7 @@
 package lk.ac.mrt.cse.system;
 
 import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.ConnectionTable;
 
 import java.util.ArrayList;
 import java.util.Observer;
@@ -49,4 +50,5 @@ public interface Server extends Runnable {
 
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes);
 
+    public ConnectionTable getRoutingTable();
 }

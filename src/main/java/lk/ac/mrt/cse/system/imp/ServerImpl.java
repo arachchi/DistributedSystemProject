@@ -9,6 +9,7 @@ import lk.ac.mrt.cse.system.model.Connection;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Utility;
 
 import java.net.DatagramPacket;
@@ -23,10 +24,10 @@ import java.util.*;
  */
 public class ServerImpl extends Observable implements Runnable,Server {
     ArrayList<String> fileList;
-    ArrayList<Connection> connections;// Routing Table
+    //ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
-
+    ConnectionTable routingTable;
 
     Client client;
 
@@ -37,9 +38,10 @@ public class ServerImpl extends Observable implements Runnable,Server {
     private static String userName;
     final static int size=1024;
 
-    public ServerImpl(ArrayList<String> fileList){
+    public ServerImpl(ConnectionTable routingTable,ArrayList<String> fileList){
+        this.routingTable=routingTable;
         this.fileList = fileList;
-        connections = new ArrayList<Connection>();
+       // connections = new ArrayList<Connection>();
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
         consoleMsg="";
     }
@@ -99,7 +101,8 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 Connection connection = new Connection(message[2],message[3]);//ip , port
 
                 try {
-                    connections.add(connection);
+                    routingTable.addConnections(connection);
+                    //connections.add(connection);
                     //Send response to node
                     String packet = "0013 JOINOK 0";
                     Utility.sendRequest(packet, message[2], message[3]);
@@ -169,11 +172,23 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 166");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        packet=packet.concat(" "+ Utility.getHostAddress(IPAddress)+" "+port);
+        packet=packet.concat(" "+ Utility.getHostAddress(IPAddress)+" "+port+" ");
+        //Append my list at the end
+        String filename;
+        for(int i=0;i<fileList.size();++i){
+            filename= fileList.get(i);
+            if(filename.contains(" ")){
+                filename=filename.replaceAll(" ","_");
+            }
+            if(i!=fileList.size()-1){
+                packet=packet.concat(filename+",");
+            }else{
+                packet=packet.concat(filename);
+            }
+        }
         String userCommand = Utility.getUniversalCommand(packet);
 
         Utility.sendRequest(userCommand, connection.getIp(), connection.getPort());
@@ -240,6 +255,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
         }
         if(!hasFile){
+            ArrayList<Connection> connections=routingTable.getConnections();
             if(connections.isEmpty()){
                 System.out.println("I don't have the file and no more connections. Aborting search.");
                 return;
@@ -278,7 +294,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 //number of hops should be checked at the server side by reading search message request
                 //and only forward to client if not expired
                 //forward the message if not expired
-
+                ArrayList<Connection> connections=routingTable.getConnections();
                     Collections.sort(connections,new CustomComparator());
 
                     for (Connection connection : connections) {
@@ -302,10 +318,10 @@ public class ServerImpl extends Observable implements Runnable,Server {
             return "The searched keyword is present in my list of files.";
         else{
             System.out.println("kdjhcjdk");
-            //String[] mes = packet.substring(9).split(" ");
+            String[] mes = packet.split(" ");
 //            for(String a: packet)
 //                System.out.println(a);
-            search(message);
+            search(mes);
         }
         return "Search request is forwarded to the network";
     }
@@ -403,7 +419,9 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     @Override
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
-        connections = firstTwoNodes;
+        for(int i=0;i<firstTwoNodes.size();++i){
+            routingTable.addConnections(firstTwoNodes.get(i));
+        }
     }
 
     public int getSize() {
@@ -412,6 +430,10 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public ArrayList<String> getFileList() {
         return fileList;
+    }
+
+    public ConnectionTable getRoutingTable() {
+        return this.routingTable;
     }
 }
 
