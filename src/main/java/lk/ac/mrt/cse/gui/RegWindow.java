@@ -76,7 +76,7 @@ public class RegWindow extends JFrame{
                     if(rpc)
                         client = new RPCClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
                     else
-                        client = new ClientImpl(server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
+                        client = new ClientImpl(server.getRoutingTable(),server.getFileList(),localPort,bsIP,Integer.parseInt(bsPort),username);
                     server.setClient(client);
 
                     boolean registered = false;

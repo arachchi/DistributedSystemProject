@@ -4,6 +4,7 @@ import lk.ac.mrt.cse.gui.AddFile;
 import lk.ac.mrt.cse.rpc.impl.NodeServiceImpl;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ServerImpl;
+import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Constants;
 
 import java.io.BufferedReader;
@@ -23,12 +24,12 @@ public class Main {
     private static Server server;
     private static boolean rpc=false;
     public static void main(String args[]){
-
+        ConnectionTable routingTable=new ConnectionTable();
         initializeFiles();
         if(rpc)
-            server = new NodeServiceImpl(nodeFileList);
+            server = new NodeServiceImpl(routingTable,nodeFileList);
         else
-            server = new ServerImpl(nodeFileList);
+            server = new ServerImpl(routingTable,nodeFileList);
         AddFile addFile = new AddFile(server,totalFilesList,nodeFileList,rpc);
         addFile.setVisible(true);
 
