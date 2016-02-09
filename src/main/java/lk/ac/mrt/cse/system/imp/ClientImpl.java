@@ -241,6 +241,16 @@ public class ClientImpl extends Observable implements Client {
 
         boolean registered = false;
 
+        //Send leave requests to all connections
+        ArrayList<Connection> connections=routingTable.getConnections();
+        for (Connection connection : connections) {
+            String IP = connection.getIp();
+            String connectionPort = connection.getPort();
+            String packet = " LEAVE "+ Utility.getHostAddress()+" "+port;;
+            String userCommand = Utility.getUniversalCommand(packet);
+            Utility.sendRequest(userCommand, IP, connectionPort);
+        }
+
         try{
             //BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
             // System.out.println("Enter Username to Register with BS");

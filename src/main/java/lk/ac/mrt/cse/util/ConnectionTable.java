@@ -18,6 +18,8 @@ public class ConnectionTable {
     public void addConnections(Connection connection) {
         this.connections.add(connection);
     }
-
+    public void removeConnection(Connection connection){
+        this.connections.remove(connection);
+    }
     ArrayList<Connection> connections;// Routing Table
 }
