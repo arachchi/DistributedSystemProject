@@ -34,7 +34,7 @@ public class NodeService {
 
   public interface Iface {
 
-    public String join(String myIp, int myPort) throws TException;
+    public String join(String joinerIp, int joinerPort) throws TException;
 
     public List<String> getFiles() throws TException;
 
@@ -42,17 +42,25 @@ public class NodeService {
 
     public String handleResult(String result) throws TException;
 
+    public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort) throws TException;
+
+    public String leave(String leaverIp, int leaverPort) throws TException;
+
   }
 
   public interface AsyncIface {
 
-    public void join(String myIp, int myPort, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.join_call> resultHandler) throws TException;
+    public void join(String joinerIp, int joinerPort, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.join_call> resultHandler) throws TException;
 
     public void getFiles(org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getFiles_call> resultHandler) throws TException;
 
     public void search(String keyWord, String requestorIP, String requestorPort, int hops, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.search_call> resultHandler) throws TException;
 
     public void handleResult(String result, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.handleResult_call> resultHandler) throws TException;
+
+    public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.handleFileList_call> resultHandler) throws TException;
+
+    public void leave(String leaverIp, int leaverPort, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.leave_call> resultHandler) throws TException;
 
   }
 
@@ -76,17 +84,17 @@ public class NodeService {
       super(iprot, oprot);
     }
 
-    public String join(String myIp, int myPort) throws TException
+    public String join(String joinerIp, int joinerPort) throws TException
     {
-      send_join(myIp, myPort);
+      send_join(joinerIp, joinerPort);
       return recv_join();
     }
 
-    public void send_join(String myIp, int myPort) throws TException
+    public void send_join(String joinerIp, int joinerPort) throws TException
     {
       join_args args = new join_args();
-      args.setMyIp(myIp);
-      args.setMyPort(myPort);
+      args.setJoinerIp(joinerIp);
+      args.setJoinerPort(joinerPort);
       sendBase("join", args);
     }
 
@@ -168,6 +176,52 @@ public class NodeService {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "handleResult failed: unknown result");
     }
 
+    public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort) throws TException
+    {
+      send_handleFileList(fileList, joinedNodeIp, joinedNodePort);
+      recv_handleFileList();
+    }
+
+    public void send_handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort) throws TException
+    {
+      handleFileList_args args = new handleFileList_args();
+      args.setFileList(fileList);
+      args.setJoinedNodeIp(joinedNodeIp);
+      args.setJoinedNodePort(joinedNodePort);
+      sendBase("handleFileList", args);
+    }
+
+    public void recv_handleFileList() throws TException
+    {
+      handleFileList_result result = new handleFileList_result();
+      receiveBase(result, "handleFileList");
+      return;
+    }
+
+    public String leave(String leaverIp, int leaverPort) throws TException
+    {
+      send_leave(leaverIp, leaverPort);
+      return recv_leave();
+    }
+
+    public void send_leave(String leaverIp, int leaverPort) throws TException
+    {
+      leave_args args = new leave_args();
+      args.setLeaverIp(leaverIp);
+      args.setLeaverPort(leaverPort);
+      sendBase("leave", args);
+    }
+
+    public String recv_leave() throws TException
+    {
+      leave_result result = new leave_result();
+      receiveBase(result, "leave");
+      if (result.isSetSuccess()) {
+        return result.success;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "leave failed: unknown result");
+    }
+
   }
   public static class AsyncClient extends org.apache.thrift.async.TAsyncClient implements AsyncIface {
     public static class Factory implements org.apache.thrift.async.TAsyncClientFactory<AsyncClient> {
@@ -186,27 +240,27 @@ public class NodeService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void join(String myIp, int myPort, org.apache.thrift.async.AsyncMethodCallback<join_call> resultHandler) throws TException {
+    public void join(String joinerIp, int joinerPort, org.apache.thrift.async.AsyncMethodCallback<join_call> resultHandler) throws TException {
       checkReady();
-      join_call method_call = new join_call(myIp, myPort, resultHandler, this, ___protocolFactory, ___transport);
+      join_call method_call = new join_call(joinerIp, joinerPort, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class join_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private String myIp;
-      private int myPort;
-      public join_call(String myIp, int myPort, org.apache.thrift.async.AsyncMethodCallback<join_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws TException {
+      private String joinerIp;
+      private int joinerPort;
+      public join_call(String joinerIp, int joinerPort, org.apache.thrift.async.AsyncMethodCallback<join_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws TException {
         super(client, protocolFactory, transport, resultHandler, false);
-        this.myIp = myIp;
-        this.myPort = myPort;
+        this.joinerIp = joinerIp;
+        this.joinerPort = joinerPort;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws TException {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("join", org.apache.thrift.protocol.TMessageType.CALL, 0));
         join_args args = new join_args();
-        args.setMyIp(myIp);
-        args.setMyPort(myPort);
+        args.setJoinerIp(joinerIp);
+        args.setJoinerPort(joinerPort);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -323,6 +377,79 @@ public class NodeService {
       }
     }
 
+    public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort, org.apache.thrift.async.AsyncMethodCallback<handleFileList_call> resultHandler) throws TException {
+      checkReady();
+      handleFileList_call method_call = new handleFileList_call(fileList, joinedNodeIp, joinedNodePort, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class handleFileList_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private List<String> fileList;
+      private String joinedNodeIp;
+      private String joinedNodePort;
+      public handleFileList_call(List<String> fileList, String joinedNodeIp, String joinedNodePort, org.apache.thrift.async.AsyncMethodCallback<handleFileList_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.fileList = fileList;
+        this.joinedNodeIp = joinedNodeIp;
+        this.joinedNodePort = joinedNodePort;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("handleFileList", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        handleFileList_args args = new handleFileList_args();
+        args.setFileList(fileList);
+        args.setJoinedNodeIp(joinedNodeIp);
+        args.setJoinedNodePort(joinedNodePort);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public void getResult() throws TException {
+        if (getState() != State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        (new Client(prot)).recv_handleFileList();
+      }
+    }
+
+    public void leave(String leaverIp, int leaverPort, org.apache.thrift.async.AsyncMethodCallback<leave_call> resultHandler) throws TException {
+      checkReady();
+      leave_call method_call = new leave_call(leaverIp, leaverPort, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class leave_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private String leaverIp;
+      private int leaverPort;
+      public leave_call(String leaverIp, int leaverPort, org.apache.thrift.async.AsyncMethodCallback<leave_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.leaverIp = leaverIp;
+        this.leaverPort = leaverPort;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("leave", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        leave_args args = new leave_args();
+        args.setLeaverIp(leaverIp);
+        args.setLeaverPort(leaverPort);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public String getResult() throws TException {
+        if (getState() != State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recv_leave();
+      }
+    }
+
   }
 
   public static class Processor<I extends Iface> extends org.apache.thrift.TBaseProcessor<I> implements org.apache.thrift.TProcessor {
@@ -340,6 +467,8 @@ public class NodeService {
       processMap.put("getFiles", new getFiles());
       processMap.put("search", new search());
       processMap.put("handleResult", new handleResult());
+      processMap.put("handleFileList", new handleFileList());
+      processMap.put("leave", new leave());
       return processMap;
     }
 
@@ -358,7 +487,7 @@ public class NodeService {
 
       public join_result getResult(I iface, join_args args) throws TException {
         join_result result = new join_result();
-        result.success = iface.join(args.myIp, args.myPort);
+        result.success = iface.join(args.joinerIp, args.joinerPort);
         return result;
       }
     }
@@ -423,13 +552,53 @@ public class NodeService {
       }
     }
 
+    public static class handleFileList<I extends Iface> extends org.apache.thrift.ProcessFunction<I, handleFileList_args> {
+      public handleFileList() {
+        super("handleFileList");
+      }
+
+      public handleFileList_args getEmptyArgsInstance() {
+        return new handleFileList_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public handleFileList_result getResult(I iface, handleFileList_args args) throws TException {
+        handleFileList_result result = new handleFileList_result();
+        iface.handleFileList(args.fileList, args.joinedNodeIp, args.joinedNodePort);
+        return result;
+      }
+    }
+
+    public static class leave<I extends Iface> extends org.apache.thrift.ProcessFunction<I, leave_args> {
+      public leave() {
+        super("leave");
+      }
+
+      public leave_args getEmptyArgsInstance() {
+        return new leave_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public leave_result getResult(I iface, leave_args args) throws TException {
+        leave_result result = new leave_result();
+        result.success = iface.leave(args.leaverIp, args.leaverPort);
+        return result;
+      }
+    }
+
   }
 
   public static class join_args implements org.apache.thrift.TBase<join_args, join_args._Fields>, java.io.Serializable, Cloneable   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("join_args");
 
-    private static final org.apache.thrift.protocol.TField MY_IP_FIELD_DESC = new org.apache.thrift.protocol.TField("myIp", org.apache.thrift.protocol.TType.STRING, (short)1);
-    private static final org.apache.thrift.protocol.TField MY_PORT_FIELD_DESC = new org.apache.thrift.protocol.TField("myPort", org.apache.thrift.protocol.TType.I32, (short)2);
+    private static final org.apache.thrift.protocol.TField JOINER_IP_FIELD_DESC = new org.apache.thrift.protocol.TField("joinerIp", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField JOINER_PORT_FIELD_DESC = new org.apache.thrift.protocol.TField("joinerPort", org.apache.thrift.protocol.TType.I32, (short)2);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -437,13 +606,13 @@ public class NodeService {
       schemes.put(TupleScheme.class, new join_argsTupleSchemeFactory());
     }
 
-    public String myIp; // required
-    public int myPort; // required
+    public String joinerIp; // required
+    public int joinerPort; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-      MY_IP((short)1, "myIp"),
-      MY_PORT((short)2, "myPort");
+      JOINER_IP((short)1, "joinerIp"),
+      JOINER_PORT((short)2, "joinerPort");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -458,10 +627,10 @@ public class NodeService {
        */
       public static _Fields findByThriftId(int fieldId) {
         switch(fieldId) {
-          case 1: // MY_IP
-            return MY_IP;
-          case 2: // MY_PORT
-            return MY_PORT;
+          case 1: // JOINER_IP
+            return JOINER_IP;
+          case 2: // JOINER_PORT
+            return JOINER_PORT;
           default:
             return null;
         }
@@ -502,14 +671,14 @@ public class NodeService {
     }
 
     // isset id assignments
-    private static final int __MYPORT_ISSET_ID = 0;
+    private static final int __JOINERPORT_ISSET_ID = 0;
     private byte __isset_bitfield = 0;
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.MY_IP, new org.apache.thrift.meta_data.FieldMetaData("myIp", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.JOINER_IP, new org.apache.thrift.meta_data.FieldMetaData("joinerIp", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , "String")));
-      tmpMap.put(_Fields.MY_PORT, new org.apache.thrift.meta_data.FieldMetaData("myPort", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.JOINER_PORT, new org.apache.thrift.meta_data.FieldMetaData("joinerPort", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(join_args.class, metaDataMap);
@@ -519,13 +688,13 @@ public class NodeService {
     }
 
     public join_args(
-      String myIp,
-      int myPort)
+      String joinerIp,
+      int joinerPort)
     {
       this();
-      this.myIp = myIp;
-      this.myPort = myPort;
-      setMyPortIsSet(true);
+      this.joinerIp = joinerIp;
+      this.joinerPort = joinerPort;
+      setJoinerPortIsSet(true);
     }
 
     /**
@@ -533,10 +702,10 @@ public class NodeService {
      */
     public join_args(join_args other) {
       __isset_bitfield = other.__isset_bitfield;
-      if (other.isSetMyIp()) {
-        this.myIp = other.myIp;
+      if (other.isSetJoinerIp()) {
+        this.joinerIp = other.joinerIp;
       }
-      this.myPort = other.myPort;
+      this.joinerPort = other.joinerPort;
     }
 
     public join_args deepCopy() {
@@ -545,73 +714,73 @@ public class NodeService {
 
     @Override
     public void clear() {
-      this.myIp = null;
-      setMyPortIsSet(false);
-      this.myPort = 0;
+      this.joinerIp = null;
+      setJoinerPortIsSet(false);
+      this.joinerPort = 0;
     }
 
-    public String getMyIp() {
-      return this.myIp;
+    public String getJoinerIp() {
+      return this.joinerIp;
     }
 
-    public join_args setMyIp(String myIp) {
-      this.myIp = myIp;
+    public join_args setJoinerIp(String joinerIp) {
+      this.joinerIp = joinerIp;
       return this;
     }
 
-    public void unsetMyIp() {
-      this.myIp = null;
+    public void unsetJoinerIp() {
+      this.joinerIp = null;
     }
 
-    /** Returns true if field myIp is set (has been assigned a value) and false otherwise */
-    public boolean isSetMyIp() {
-      return this.myIp != null;
+    /** Returns true if field joinerIp is set (has been assigned a value) and false otherwise */
+    public boolean isSetJoinerIp() {
+      return this.joinerIp != null;
     }
 
-    public void setMyIpIsSet(boolean value) {
+    public void setJoinerIpIsSet(boolean value) {
       if (!value) {
-        this.myIp = null;
+        this.joinerIp = null;
       }
     }
 
-    public int getMyPort() {
-      return this.myPort;
+    public int getJoinerPort() {
+      return this.joinerPort;
     }
 
-    public join_args setMyPort(int myPort) {
-      this.myPort = myPort;
-      setMyPortIsSet(true);
+    public join_args setJoinerPort(int joinerPort) {
+      this.joinerPort = joinerPort;
+      setJoinerPortIsSet(true);
       return this;
     }
 
-    public void unsetMyPort() {
-      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __MYPORT_ISSET_ID);
+    public void unsetJoinerPort() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __JOINERPORT_ISSET_ID);
     }
 
-    /** Returns true if field myPort is set (has been assigned a value) and false otherwise */
-    public boolean isSetMyPort() {
-      return EncodingUtils.testBit(__isset_bitfield, __MYPORT_ISSET_ID);
+    /** Returns true if field joinerPort is set (has been assigned a value) and false otherwise */
+    public boolean isSetJoinerPort() {
+      return EncodingUtils.testBit(__isset_bitfield, __JOINERPORT_ISSET_ID);
     }
 
-    public void setMyPortIsSet(boolean value) {
-      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __MYPORT_ISSET_ID, value);
+    public void setJoinerPortIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __JOINERPORT_ISSET_ID, value);
     }
 
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
-      case MY_IP:
+      case JOINER_IP:
         if (value == null) {
-          unsetMyIp();
+          unsetJoinerIp();
         } else {
-          setMyIp((String)value);
+          setJoinerIp((String)value);
         }
         break;
 
-      case MY_PORT:
+      case JOINER_PORT:
         if (value == null) {
-          unsetMyPort();
+          unsetJoinerPort();
         } else {
-          setMyPort((Integer)value);
+          setJoinerPort((Integer)value);
         }
         break;
 
@@ -620,11 +789,11 @@ public class NodeService {
 
     public Object getFieldValue(_Fields field) {
       switch (field) {
-      case MY_IP:
-        return getMyIp();
+      case JOINER_IP:
+        return getJoinerIp();
 
-      case MY_PORT:
-        return Integer.valueOf(getMyPort());
+      case JOINER_PORT:
+        return Integer.valueOf(getJoinerPort());
 
       }
       throw new IllegalStateException();
@@ -637,10 +806,10 @@ public class NodeService {
       }
 
       switch (field) {
-      case MY_IP:
-        return isSetMyIp();
-      case MY_PORT:
-        return isSetMyPort();
+      case JOINER_IP:
+        return isSetJoinerIp();
+      case JOINER_PORT:
+        return isSetJoinerPort();
       }
       throw new IllegalStateException();
     }
@@ -658,21 +827,21 @@ public class NodeService {
       if (that == null)
         return false;
 
-      boolean this_present_myIp = true && this.isSetMyIp();
-      boolean that_present_myIp = true && that.isSetMyIp();
-      if (this_present_myIp || that_present_myIp) {
-        if (!(this_present_myIp && that_present_myIp))
+      boolean this_present_joinerIp = true && this.isSetJoinerIp();
+      boolean that_present_joinerIp = true && that.isSetJoinerIp();
+      if (this_present_joinerIp || that_present_joinerIp) {
+        if (!(this_present_joinerIp && that_present_joinerIp))
           return false;
-        if (!this.myIp.equals(that.myIp))
+        if (!this.joinerIp.equals(that.joinerIp))
           return false;
       }
 
-      boolean this_present_myPort = true;
-      boolean that_present_myPort = true;
-      if (this_present_myPort || that_present_myPort) {
-        if (!(this_present_myPort && that_present_myPort))
+      boolean this_present_joinerPort = true;
+      boolean that_present_joinerPort = true;
+      if (this_present_joinerPort || that_present_joinerPort) {
+        if (!(this_present_joinerPort && that_present_joinerPort))
           return false;
-        if (this.myPort != that.myPort)
+        if (this.joinerPort != that.joinerPort)
           return false;
       }
 
@@ -692,22 +861,22 @@ public class NodeService {
       int lastComparison = 0;
       join_args typedOther = (join_args)other;
 
-      lastComparison = Boolean.valueOf(isSetMyIp()).compareTo(typedOther.isSetMyIp());
+      lastComparison = Boolean.valueOf(isSetJoinerIp()).compareTo(typedOther.isSetJoinerIp());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetMyIp()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.myIp, typedOther.myIp);
+      if (isSetJoinerIp()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.joinerIp, typedOther.joinerIp);
         if (lastComparison != 0) {
           return lastComparison;
         }
       }
-      lastComparison = Boolean.valueOf(isSetMyPort()).compareTo(typedOther.isSetMyPort());
+      lastComparison = Boolean.valueOf(isSetJoinerPort()).compareTo(typedOther.isSetJoinerPort());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetMyPort()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.myPort, typedOther.myPort);
+      if (isSetJoinerPort()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.joinerPort, typedOther.joinerPort);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -732,16 +901,16 @@ public class NodeService {
       StringBuilder sb = new StringBuilder("join_args(");
       boolean first = true;
 
-      sb.append("myIp:");
-      if (this.myIp == null) {
+      sb.append("joinerIp:");
+      if (this.joinerIp == null) {
         sb.append("null");
       } else {
-        sb.append(this.myIp);
+        sb.append(this.joinerIp);
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("myPort:");
-      sb.append(this.myPort);
+      sb.append("joinerPort:");
+      sb.append(this.joinerPort);
       first = false;
       sb.append(")");
       return sb.toString();
@@ -788,18 +957,18 @@ public class NodeService {
             break;
           }
           switch (schemeField.id) {
-            case 1: // MY_IP
+            case 1: // JOINER_IP
               if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.myIp = iprot.readString();
-                struct.setMyIpIsSet(true);
+                struct.joinerIp = iprot.readString();
+                struct.setJoinerIpIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
               break;
-            case 2: // MY_PORT
+            case 2: // JOINER_PORT
               if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
-                struct.myPort = iprot.readI32();
-                struct.setMyPortIsSet(true);
+                struct.joinerPort = iprot.readI32();
+                struct.setJoinerPortIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -819,13 +988,13 @@ public class NodeService {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.myIp != null) {
-          oprot.writeFieldBegin(MY_IP_FIELD_DESC);
-          oprot.writeString(struct.myIp);
+        if (struct.joinerIp != null) {
+          oprot.writeFieldBegin(JOINER_IP_FIELD_DESC);
+          oprot.writeString(struct.joinerIp);
           oprot.writeFieldEnd();
         }
-        oprot.writeFieldBegin(MY_PORT_FIELD_DESC);
-        oprot.writeI32(struct.myPort);
+        oprot.writeFieldBegin(JOINER_PORT_FIELD_DESC);
+        oprot.writeI32(struct.joinerPort);
         oprot.writeFieldEnd();
         oprot.writeFieldStop();
         oprot.writeStructEnd();
@@ -845,18 +1014,18 @@ public class NodeService {
       public void write(org.apache.thrift.protocol.TProtocol prot, join_args struct) throws TException {
         TTupleProtocol oprot = (TTupleProtocol) prot;
         BitSet optionals = new BitSet();
-        if (struct.isSetMyIp()) {
+        if (struct.isSetJoinerIp()) {
           optionals.set(0);
         }
-        if (struct.isSetMyPort()) {
+        if (struct.isSetJoinerPort()) {
           optionals.set(1);
         }
         oprot.writeBitSet(optionals, 2);
-        if (struct.isSetMyIp()) {
-          oprot.writeString(struct.myIp);
+        if (struct.isSetJoinerIp()) {
+          oprot.writeString(struct.joinerIp);
         }
-        if (struct.isSetMyPort()) {
-          oprot.writeI32(struct.myPort);
+        if (struct.isSetJoinerPort()) {
+          oprot.writeI32(struct.joinerPort);
         }
       }
 
@@ -865,12 +1034,12 @@ public class NodeService {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
-          struct.myIp = iprot.readString();
-          struct.setMyIpIsSet(true);
+          struct.joinerIp = iprot.readString();
+          struct.setJoinerIpIsSet(true);
         }
         if (incoming.get(1)) {
-          struct.myPort = iprot.readI32();
-          struct.setMyPortIsSet(true);
+          struct.joinerPort = iprot.readI32();
+          struct.setJoinerPortIsSet(true);
         }
       }
     }
@@ -3478,6 +3647,1664 @@ public class NodeService {
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, handleResult_result struct) throws TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          struct.success = iprot.readString();
+          struct.setSuccessIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class handleFileList_args implements org.apache.thrift.TBase<handleFileList_args, handleFileList_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("handleFileList_args");
+
+    private static final org.apache.thrift.protocol.TField FILE_LIST_FIELD_DESC = new org.apache.thrift.protocol.TField("fileList", org.apache.thrift.protocol.TType.LIST, (short)1);
+    private static final org.apache.thrift.protocol.TField JOINED_NODE_IP_FIELD_DESC = new org.apache.thrift.protocol.TField("joinedNodeIp", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField JOINED_NODE_PORT_FIELD_DESC = new org.apache.thrift.protocol.TField("joinedNodePort", org.apache.thrift.protocol.TType.STRING, (short)3);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new handleFileList_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new handleFileList_argsTupleSchemeFactory());
+    }
+
+    public List<String> fileList; // required
+    public String joinedNodeIp; // required
+    public String joinedNodePort; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      FILE_LIST((short)1, "fileList"),
+      JOINED_NODE_IP((short)2, "joinedNodeIp"),
+      JOINED_NODE_PORT((short)3, "joinedNodePort");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // FILE_LIST
+            return FILE_LIST;
+          case 2: // JOINED_NODE_IP
+            return JOINED_NODE_IP;
+          case 3: // JOINED_NODE_PORT
+            return JOINED_NODE_PORT;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.FILE_LIST, new org.apache.thrift.meta_data.FieldMetaData("fileList", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING              , "String"))));
+      tmpMap.put(_Fields.JOINED_NODE_IP, new org.apache.thrift.meta_data.FieldMetaData("joinedNodeIp", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , "String")));
+      tmpMap.put(_Fields.JOINED_NODE_PORT, new org.apache.thrift.meta_data.FieldMetaData("joinedNodePort", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , "String")));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(handleFileList_args.class, metaDataMap);
+    }
+
+    public handleFileList_args() {
+    }
+
+    public handleFileList_args(
+      List<String> fileList,
+      String joinedNodeIp,
+      String joinedNodePort)
+    {
+      this();
+      this.fileList = fileList;
+      this.joinedNodeIp = joinedNodeIp;
+      this.joinedNodePort = joinedNodePort;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public handleFileList_args(handleFileList_args other) {
+      if (other.isSetFileList()) {
+        List<String> __this__fileList = new ArrayList<String>();
+        for (String other_element : other.fileList) {
+          __this__fileList.add(other_element);
+        }
+        this.fileList = __this__fileList;
+      }
+      if (other.isSetJoinedNodeIp()) {
+        this.joinedNodeIp = other.joinedNodeIp;
+      }
+      if (other.isSetJoinedNodePort()) {
+        this.joinedNodePort = other.joinedNodePort;
+      }
+    }
+
+    public handleFileList_args deepCopy() {
+      return new handleFileList_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.fileList = null;
+      this.joinedNodeIp = null;
+      this.joinedNodePort = null;
+    }
+
+    public int getFileListSize() {
+      return (this.fileList == null) ? 0 : this.fileList.size();
+    }
+
+    public java.util.Iterator<String> getFileListIterator() {
+      return (this.fileList == null) ? null : this.fileList.iterator();
+    }
+
+    public void addToFileList(String elem) {
+      if (this.fileList == null) {
+        this.fileList = new ArrayList<String>();
+      }
+      this.fileList.add(elem);
+    }
+
+    public List<String> getFileList() {
+      return this.fileList;
+    }
+
+    public handleFileList_args setFileList(List<String> fileList) {
+      this.fileList = fileList;
+      return this;
+    }
+
+    public void unsetFileList() {
+      this.fileList = null;
+    }
+
+    /** Returns true if field fileList is set (has been assigned a value) and false otherwise */
+    public boolean isSetFileList() {
+      return this.fileList != null;
+    }
+
+    public void setFileListIsSet(boolean value) {
+      if (!value) {
+        this.fileList = null;
+      }
+    }
+
+    public String getJoinedNodeIp() {
+      return this.joinedNodeIp;
+    }
+
+    public handleFileList_args setJoinedNodeIp(String joinedNodeIp) {
+      this.joinedNodeIp = joinedNodeIp;
+      return this;
+    }
+
+    public void unsetJoinedNodeIp() {
+      this.joinedNodeIp = null;
+    }
+
+    /** Returns true if field joinedNodeIp is set (has been assigned a value) and false otherwise */
+    public boolean isSetJoinedNodeIp() {
+      return this.joinedNodeIp != null;
+    }
+
+    public void setJoinedNodeIpIsSet(boolean value) {
+      if (!value) {
+        this.joinedNodeIp = null;
+      }
+    }
+
+    public String getJoinedNodePort() {
+      return this.joinedNodePort;
+    }
+
+    public handleFileList_args setJoinedNodePort(String joinedNodePort) {
+      this.joinedNodePort = joinedNodePort;
+      return this;
+    }
+
+    public void unsetJoinedNodePort() {
+      this.joinedNodePort = null;
+    }
+
+    /** Returns true if field joinedNodePort is set (has been assigned a value) and false otherwise */
+    public boolean isSetJoinedNodePort() {
+      return this.joinedNodePort != null;
+    }
+
+    public void setJoinedNodePortIsSet(boolean value) {
+      if (!value) {
+        this.joinedNodePort = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case FILE_LIST:
+        if (value == null) {
+          unsetFileList();
+        } else {
+          setFileList((List<String>)value);
+        }
+        break;
+
+      case JOINED_NODE_IP:
+        if (value == null) {
+          unsetJoinedNodeIp();
+        } else {
+          setJoinedNodeIp((String)value);
+        }
+        break;
+
+      case JOINED_NODE_PORT:
+        if (value == null) {
+          unsetJoinedNodePort();
+        } else {
+          setJoinedNodePort((String)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case FILE_LIST:
+        return getFileList();
+
+      case JOINED_NODE_IP:
+        return getJoinedNodeIp();
+
+      case JOINED_NODE_PORT:
+        return getJoinedNodePort();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case FILE_LIST:
+        return isSetFileList();
+      case JOINED_NODE_IP:
+        return isSetJoinedNodeIp();
+      case JOINED_NODE_PORT:
+        return isSetJoinedNodePort();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof handleFileList_args)
+        return this.equals((handleFileList_args)that);
+      return false;
+    }
+
+    public boolean equals(handleFileList_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_fileList = true && this.isSetFileList();
+      boolean that_present_fileList = true && that.isSetFileList();
+      if (this_present_fileList || that_present_fileList) {
+        if (!(this_present_fileList && that_present_fileList))
+          return false;
+        if (!this.fileList.equals(that.fileList))
+          return false;
+      }
+
+      boolean this_present_joinedNodeIp = true && this.isSetJoinedNodeIp();
+      boolean that_present_joinedNodeIp = true && that.isSetJoinedNodeIp();
+      if (this_present_joinedNodeIp || that_present_joinedNodeIp) {
+        if (!(this_present_joinedNodeIp && that_present_joinedNodeIp))
+          return false;
+        if (!this.joinedNodeIp.equals(that.joinedNodeIp))
+          return false;
+      }
+
+      boolean this_present_joinedNodePort = true && this.isSetJoinedNodePort();
+      boolean that_present_joinedNodePort = true && that.isSetJoinedNodePort();
+      if (this_present_joinedNodePort || that_present_joinedNodePort) {
+        if (!(this_present_joinedNodePort && that_present_joinedNodePort))
+          return false;
+        if (!this.joinedNodePort.equals(that.joinedNodePort))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(handleFileList_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      handleFileList_args typedOther = (handleFileList_args)other;
+
+      lastComparison = Boolean.valueOf(isSetFileList()).compareTo(typedOther.isSetFileList());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetFileList()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.fileList, typedOther.fileList);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetJoinedNodeIp()).compareTo(typedOther.isSetJoinedNodeIp());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetJoinedNodeIp()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.joinedNodeIp, typedOther.joinedNodeIp);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetJoinedNodePort()).compareTo(typedOther.isSetJoinedNodePort());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetJoinedNodePort()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.joinedNodePort, typedOther.joinedNodePort);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("handleFileList_args(");
+      boolean first = true;
+
+      sb.append("fileList:");
+      if (this.fileList == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.fileList);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("joinedNodeIp:");
+      if (this.joinedNodeIp == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.joinedNodeIp);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("joinedNodePort:");
+      if (this.joinedNodePort == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.joinedNodePort);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class handleFileList_argsStandardSchemeFactory implements SchemeFactory {
+      public handleFileList_argsStandardScheme getScheme() {
+        return new handleFileList_argsStandardScheme();
+      }
+    }
+
+    private static class handleFileList_argsStandardScheme extends StandardScheme<handleFileList_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, handleFileList_args struct) throws TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // FILE_LIST
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
+                  struct.fileList = new ArrayList<String>(_list8.size);
+                  for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+                  {
+                    String _elem10; // required
+                    _elem10 = iprot.readString();
+                    struct.fileList.add(_elem10);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setFileListIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // JOINED_NODE_IP
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.joinedNodeIp = iprot.readString();
+                struct.setJoinedNodeIpIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // JOINED_NODE_PORT
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.joinedNodePort = iprot.readString();
+                struct.setJoinedNodePortIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, handleFileList_args struct) throws TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.fileList != null) {
+          oprot.writeFieldBegin(FILE_LIST_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, struct.fileList.size()));
+            for (String _iter11 : struct.fileList)
+            {
+              oprot.writeString(_iter11);
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        if (struct.joinedNodeIp != null) {
+          oprot.writeFieldBegin(JOINED_NODE_IP_FIELD_DESC);
+          oprot.writeString(struct.joinedNodeIp);
+          oprot.writeFieldEnd();
+        }
+        if (struct.joinedNodePort != null) {
+          oprot.writeFieldBegin(JOINED_NODE_PORT_FIELD_DESC);
+          oprot.writeString(struct.joinedNodePort);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class handleFileList_argsTupleSchemeFactory implements SchemeFactory {
+      public handleFileList_argsTupleScheme getScheme() {
+        return new handleFileList_argsTupleScheme();
+      }
+    }
+
+    private static class handleFileList_argsTupleScheme extends TupleScheme<handleFileList_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, handleFileList_args struct) throws TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetFileList()) {
+          optionals.set(0);
+        }
+        if (struct.isSetJoinedNodeIp()) {
+          optionals.set(1);
+        }
+        if (struct.isSetJoinedNodePort()) {
+          optionals.set(2);
+        }
+        oprot.writeBitSet(optionals, 3);
+        if (struct.isSetFileList()) {
+          {
+            oprot.writeI32(struct.fileList.size());
+            for (String _iter12 : struct.fileList)
+            {
+              oprot.writeString(_iter12);
+            }
+          }
+        }
+        if (struct.isSetJoinedNodeIp()) {
+          oprot.writeString(struct.joinedNodeIp);
+        }
+        if (struct.isSetJoinedNodePort()) {
+          oprot.writeString(struct.joinedNodePort);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, handleFileList_args struct) throws TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(3);
+        if (incoming.get(0)) {
+          {
+            org.apache.thrift.protocol.TList _list13 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, iprot.readI32());
+            struct.fileList = new ArrayList<String>(_list13.size);
+            for (int _i14 = 0; _i14 < _list13.size; ++_i14)
+            {
+              String _elem15; // required
+              _elem15 = iprot.readString();
+              struct.fileList.add(_elem15);
+            }
+          }
+          struct.setFileListIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.joinedNodeIp = iprot.readString();
+          struct.setJoinedNodeIpIsSet(true);
+        }
+        if (incoming.get(2)) {
+          struct.joinedNodePort = iprot.readString();
+          struct.setJoinedNodePortIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class handleFileList_result implements org.apache.thrift.TBase<handleFileList_result, handleFileList_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("handleFileList_result");
+
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new handleFileList_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new handleFileList_resultTupleSchemeFactory());
+    }
+
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+;
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(handleFileList_result.class, metaDataMap);
+    }
+
+    public handleFileList_result() {
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public handleFileList_result(handleFileList_result other) {
+    }
+
+    public handleFileList_result deepCopy() {
+      return new handleFileList_result(this);
+    }
+
+    @Override
+    public void clear() {
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof handleFileList_result)
+        return this.equals((handleFileList_result)that);
+      return false;
+    }
+
+    public boolean equals(handleFileList_result that) {
+      if (that == null)
+        return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(handleFileList_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      handleFileList_result typedOther = (handleFileList_result)other;
+
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("handleFileList_result(");
+      boolean first = true;
+
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class handleFileList_resultStandardSchemeFactory implements SchemeFactory {
+      public handleFileList_resultStandardScheme getScheme() {
+        return new handleFileList_resultStandardScheme();
+      }
+    }
+
+    private static class handleFileList_resultStandardScheme extends StandardScheme<handleFileList_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, handleFileList_result struct) throws TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, handleFileList_result struct) throws TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class handleFileList_resultTupleSchemeFactory implements SchemeFactory {
+      public handleFileList_resultTupleScheme getScheme() {
+        return new handleFileList_resultTupleScheme();
+      }
+    }
+
+    private static class handleFileList_resultTupleScheme extends TupleScheme<handleFileList_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, handleFileList_result struct) throws TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, handleFileList_result struct) throws TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+      }
+    }
+
+  }
+
+  public static class leave_args implements org.apache.thrift.TBase<leave_args, leave_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("leave_args");
+
+    private static final org.apache.thrift.protocol.TField LEAVER_IP_FIELD_DESC = new org.apache.thrift.protocol.TField("leaverIp", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField LEAVER_PORT_FIELD_DESC = new org.apache.thrift.protocol.TField("leaverPort", org.apache.thrift.protocol.TType.I32, (short)2);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new leave_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new leave_argsTupleSchemeFactory());
+    }
+
+    public String leaverIp; // required
+    public int leaverPort; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      LEAVER_IP((short)1, "leaverIp"),
+      LEAVER_PORT((short)2, "leaverPort");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // LEAVER_IP
+            return LEAVER_IP;
+          case 2: // LEAVER_PORT
+            return LEAVER_PORT;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    private static final int __LEAVERPORT_ISSET_ID = 0;
+    private byte __isset_bitfield = 0;
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.LEAVER_IP, new org.apache.thrift.meta_data.FieldMetaData("leaverIp", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , "String")));
+      tmpMap.put(_Fields.LEAVER_PORT, new org.apache.thrift.meta_data.FieldMetaData("leaverPort", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(leave_args.class, metaDataMap);
+    }
+
+    public leave_args() {
+    }
+
+    public leave_args(
+      String leaverIp,
+      int leaverPort)
+    {
+      this();
+      this.leaverIp = leaverIp;
+      this.leaverPort = leaverPort;
+      setLeaverPortIsSet(true);
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public leave_args(leave_args other) {
+      __isset_bitfield = other.__isset_bitfield;
+      if (other.isSetLeaverIp()) {
+        this.leaverIp = other.leaverIp;
+      }
+      this.leaverPort = other.leaverPort;
+    }
+
+    public leave_args deepCopy() {
+      return new leave_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.leaverIp = null;
+      setLeaverPortIsSet(false);
+      this.leaverPort = 0;
+    }
+
+    public String getLeaverIp() {
+      return this.leaverIp;
+    }
+
+    public leave_args setLeaverIp(String leaverIp) {
+      this.leaverIp = leaverIp;
+      return this;
+    }
+
+    public void unsetLeaverIp() {
+      this.leaverIp = null;
+    }
+
+    /** Returns true if field leaverIp is set (has been assigned a value) and false otherwise */
+    public boolean isSetLeaverIp() {
+      return this.leaverIp != null;
+    }
+
+    public void setLeaverIpIsSet(boolean value) {
+      if (!value) {
+        this.leaverIp = null;
+      }
+    }
+
+    public int getLeaverPort() {
+      return this.leaverPort;
+    }
+
+    public leave_args setLeaverPort(int leaverPort) {
+      this.leaverPort = leaverPort;
+      setLeaverPortIsSet(true);
+      return this;
+    }
+
+    public void unsetLeaverPort() {
+      __isset_bitfield = EncodingUtils.clearBit(__isset_bitfield, __LEAVERPORT_ISSET_ID);
+    }
+
+    /** Returns true if field leaverPort is set (has been assigned a value) and false otherwise */
+    public boolean isSetLeaverPort() {
+      return EncodingUtils.testBit(__isset_bitfield, __LEAVERPORT_ISSET_ID);
+    }
+
+    public void setLeaverPortIsSet(boolean value) {
+      __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __LEAVERPORT_ISSET_ID, value);
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case LEAVER_IP:
+        if (value == null) {
+          unsetLeaverIp();
+        } else {
+          setLeaverIp((String)value);
+        }
+        break;
+
+      case LEAVER_PORT:
+        if (value == null) {
+          unsetLeaverPort();
+        } else {
+          setLeaverPort((Integer)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case LEAVER_IP:
+        return getLeaverIp();
+
+      case LEAVER_PORT:
+        return Integer.valueOf(getLeaverPort());
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case LEAVER_IP:
+        return isSetLeaverIp();
+      case LEAVER_PORT:
+        return isSetLeaverPort();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof leave_args)
+        return this.equals((leave_args)that);
+      return false;
+    }
+
+    public boolean equals(leave_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_leaverIp = true && this.isSetLeaverIp();
+      boolean that_present_leaverIp = true && that.isSetLeaverIp();
+      if (this_present_leaverIp || that_present_leaverIp) {
+        if (!(this_present_leaverIp && that_present_leaverIp))
+          return false;
+        if (!this.leaverIp.equals(that.leaverIp))
+          return false;
+      }
+
+      boolean this_present_leaverPort = true;
+      boolean that_present_leaverPort = true;
+      if (this_present_leaverPort || that_present_leaverPort) {
+        if (!(this_present_leaverPort && that_present_leaverPort))
+          return false;
+        if (this.leaverPort != that.leaverPort)
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(leave_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      leave_args typedOther = (leave_args)other;
+
+      lastComparison = Boolean.valueOf(isSetLeaverIp()).compareTo(typedOther.isSetLeaverIp());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetLeaverIp()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.leaverIp, typedOther.leaverIp);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetLeaverPort()).compareTo(typedOther.isSetLeaverPort());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetLeaverPort()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.leaverPort, typedOther.leaverPort);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("leave_args(");
+      boolean first = true;
+
+      sb.append("leaverIp:");
+      if (this.leaverIp == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.leaverIp);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("leaverPort:");
+      sb.append(this.leaverPort);
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class leave_argsStandardSchemeFactory implements SchemeFactory {
+      public leave_argsStandardScheme getScheme() {
+        return new leave_argsStandardScheme();
+      }
+    }
+
+    private static class leave_argsStandardScheme extends StandardScheme<leave_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, leave_args struct) throws TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // LEAVER_IP
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.leaverIp = iprot.readString();
+                struct.setLeaverIpIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // LEAVER_PORT
+              if (schemeField.type == org.apache.thrift.protocol.TType.I32) {
+                struct.leaverPort = iprot.readI32();
+                struct.setLeaverPortIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, leave_args struct) throws TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.leaverIp != null) {
+          oprot.writeFieldBegin(LEAVER_IP_FIELD_DESC);
+          oprot.writeString(struct.leaverIp);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldBegin(LEAVER_PORT_FIELD_DESC);
+        oprot.writeI32(struct.leaverPort);
+        oprot.writeFieldEnd();
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class leave_argsTupleSchemeFactory implements SchemeFactory {
+      public leave_argsTupleScheme getScheme() {
+        return new leave_argsTupleScheme();
+      }
+    }
+
+    private static class leave_argsTupleScheme extends TupleScheme<leave_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, leave_args struct) throws TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetLeaverIp()) {
+          optionals.set(0);
+        }
+        if (struct.isSetLeaverPort()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.isSetLeaverIp()) {
+          oprot.writeString(struct.leaverIp);
+        }
+        if (struct.isSetLeaverPort()) {
+          oprot.writeI32(struct.leaverPort);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, leave_args struct) throws TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          struct.leaverIp = iprot.readString();
+          struct.setLeaverIpIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.leaverPort = iprot.readI32();
+          struct.setLeaverPortIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class leave_result implements org.apache.thrift.TBase<leave_result, leave_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("leave_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRING, (short)0);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new leave_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new leave_resultTupleSchemeFactory());
+    }
+
+    public String success; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING          , "String")));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(leave_result.class, metaDataMap);
+    }
+
+    public leave_result() {
+    }
+
+    public leave_result(
+      String success)
+    {
+      this();
+      this.success = success;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public leave_result(leave_result other) {
+      if (other.isSetSuccess()) {
+        this.success = other.success;
+      }
+    }
+
+    public leave_result deepCopy() {
+      return new leave_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.success = null;
+    }
+
+    public String getSuccess() {
+      return this.success;
+    }
+
+    public leave_result setSuccess(String success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unsetSuccess() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean isSetSuccess() {
+      return this.success != null;
+    }
+
+    public void setSuccessIsSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unsetSuccess();
+        } else {
+          setSuccess((String)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return getSuccess();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return isSetSuccess();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof leave_result)
+        return this.equals((leave_result)that);
+      return false;
+    }
+
+    public boolean equals(leave_result that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(leave_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      leave_result typedOther = (leave_result)other;
+
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSuccess()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("leave_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class leave_resultStandardSchemeFactory implements SchemeFactory {
+      public leave_resultStandardScheme getScheme() {
+        return new leave_resultStandardScheme();
+      }
+    }
+
+    private static class leave_resultStandardScheme extends StandardScheme<leave_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, leave_result struct) throws TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.success = iprot.readString();
+                struct.setSuccessIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, leave_result struct) throws TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          oprot.writeString(struct.success);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class leave_resultTupleSchemeFactory implements SchemeFactory {
+      public leave_resultTupleScheme getScheme() {
+        return new leave_resultTupleScheme();
+      }
+    }
+
+    private static class leave_resultTupleScheme extends TupleScheme<leave_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, leave_result struct) throws TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetSuccess()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetSuccess()) {
+          oprot.writeString(struct.success);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, leave_result struct) throws TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
