@@ -99,7 +99,6 @@ public class RegWindow extends JFrame{
                     textArea1.setText("Ok Registration Window");
 
                 }else{
-
                     server.unRegisterToServer();
                     connectButton.setText("Register");
                 }
