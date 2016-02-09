@@ -15,7 +15,6 @@ import org.apache.thrift.transport.TTransportException;
 
 import java.net.InetAddress;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by sabra on 2/6/16.
@@ -69,7 +68,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     }
 
     @Override
-    public String search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
+    public void search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
 
         //connections.addAll(client.getConnectedNodes().stream().collect(Collectors.toList()));
 
@@ -114,7 +113,28 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         }
 
         if (hasFile) {//this node has the keyword
+
+            //Send The requestor that this node has the file
             response = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
+
+            TTransport transport;
+            try {
+                transport = new TSocket(requestorIP, Integer.parseInt(requestorPort));
+
+                TProtocol protocol = new TBinaryProtocol(transport);
+
+                NodeService.Client client = new NodeService.Client(protocol);
+                transport.open();
+
+                response = client.handleResult(response);
+
+                transport.close();
+            } catch (TTransportException e) {
+                e.printStackTrace();
+            } catch (TException e) {
+                e.printStackTrace();
+            }
+
         }
         else if (!files.isEmpty()) {//neighbour nodes have the keyword
 
@@ -133,7 +153,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
                         NodeService.Client client = new NodeService.Client(protocol);
                         transport.open();
 
-                        response = client.search(keyWord,requestorIP,requestorPort,hops);
+                        client.search(keyWord,requestorIP,requestorPort,hops);
 
                         transport.close();
                     } catch (TTransportException e) {
@@ -166,7 +186,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
                         NodeService.Client client = new NodeService.Client(protocol);
                         transport.open();
 
-                        response = client.search(keyWord,requestorIP,requestorPort,hops);
+                        client.search(keyWord,requestorIP,requestorPort,hops);
 
                         transport.close();
                     } catch (TTransportException e) {
@@ -179,8 +199,15 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
             }
         }
+    }
 
-        return response;
+    @Override
+    public String handleResult(String result) throws TException {
+
+        String[] message = result.split(" ");
+
+        //Connect to IP and Port to get the file - No Implementation needed
+        return "Successfully Connected to you: ip- " + message[3] + " port- " + message[4];
     }
 
     private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
@@ -254,13 +281,13 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             int hops = Integer.parseInt(mes[1]);
 
             try {
-                return search(keyword, requestorIp, requestorPort, hops);
+                search(keyword, requestorIp, requestorPort, hops);
             } catch (TException e) {
                 e.printStackTrace();
             }
         }
 
-        return null;
+        return "Search is forwarded to network";
     }
 
     @Override
