@@ -105,10 +105,12 @@ public class ServerImpl extends Observable implements Runnable,Server {
                     //connections.add(connection);
                     //Send response to node
                     String packet = "0013 JOINOK 0";
+                    setConsoleMsg("JOINOK");
                     Utility.sendRequest(packet, message[2], message[3]);
                 }
                 catch(Exception ex){
                     String packet = "0016 JOINOK 9999";
+                    setConsoleMsg("JOINFAILED");
                     Utility.sendRequest(packet, message[2], message[3]);
                 }
 
@@ -133,19 +135,20 @@ public class ServerImpl extends Observable implements Runnable,Server {
                     routingTable.removeConnection(connection);
                     //Send response to node
                     String packet = "0014 LEAVEOK 0";
+                    setConsoleMsg("LEAVEOK");
                     Utility.sendRequest(packet, message[2], message[3]);
                 }
                 catch(Exception ex){
                     String packet = "0017 LEAVEOK 9999";
+                    setConsoleMsg("LEAVEFAILED");
                     Utility.sendRequest(packet, message[2], message[3]);
                 }
             }
-            consoleMsg = "RECEIVED: " + query;
-            setChanged();
-            notifyObservers();
+            setConsoleMsg("RECEIVED: " + query);
         }else{
             //Send response of failure to node
             String packet = "0010 ERROR";
+            setConsoleMsg("ERROR");
             Utility.sendRequest(packet, message[2], message[3]);
         }
     }
@@ -158,7 +161,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
         InetAddress IPAddress = null;
         try {
             IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 140");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -215,7 +217,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
         for(String a:message)
             System.out.println(a);
-        System.out.println("iwarai;");
 
         ArrayList<Connection> existingConnections;
         String fileNamesString = message[4];
@@ -338,10 +339,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
         if(packet.equals("The searched keyword is present in my list of files."))
             return "The searched keyword is present in my list of files.";
         else{
-            System.out.println("kdjhcjdk");
-            String[] mes = packet.split(" ");
-//            for(String a: packet)
-//                System.out.println(a);
+            String[] mes = packet.split(" ");;
             search(mes);
         }
         return "Search request is forwarded to the network";
@@ -388,6 +386,8 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
+        setChanged();
+        notifyObservers();
     }
 
     public Client getClient() {
