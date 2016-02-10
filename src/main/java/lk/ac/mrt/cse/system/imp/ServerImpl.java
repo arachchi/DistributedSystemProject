@@ -233,9 +233,9 @@ public class ServerImpl extends Observable implements Runnable,Server {
         }
     }
 
-    public void search(String[] message){//Search Query is SEARCH filename no_of_hops searcher's_ip searcher's_port//search query runs here
+    public void search(String[] message){//Search Query is SER filename no_of_hops searcher's_ip searcher's_port//search query runs here
         String keyword = message[2];
-        int hops = Integer.parseInt(message[3])-1;//TODO: Number format exception
+        int hops = Integer.parseInt(message[3])-1;
         if(hops<1) hops = 0;
         String searcherIPAddress = message[4];
         String searcherPort = message[5];
@@ -265,6 +265,10 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
         }
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> f58dd3f26d03627132bb092dee794d4dfdd5cd43
     private boolean checkIfKeyInLocalFiles(String keyword,String searcherIPAddress,String searcherPort,int hops){
         boolean hasFile=false;
         String searchResults = "";//search results

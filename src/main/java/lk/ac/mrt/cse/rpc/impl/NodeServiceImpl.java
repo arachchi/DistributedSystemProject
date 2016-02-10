@@ -38,7 +38,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public NodeServiceImpl(ConnectionTable routingTable,ArrayList<String> fileList){
         this.routingTable=routingTable;
         this.fileList = fileList;
-        connections = new ArrayList<Connection>();
+        //connections = new ArrayList<Connection>();
         neighbourFileList = new Hashtable<String, ArrayList<Connection>>();
         consoleMsg="";
     }
@@ -47,9 +47,9 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public String join(String myIp, int myPort) throws TException {
         //Connection will be established; Ip and port will be saved
         Connection connection = new Connection(myIp,""+myPort);//ip , port
-        String packet = null;
+        String packet;
         try {
-            connections.add(connection);
+            routingTable.addConnections(connection);
             //Send response to node
             packet = "0013 JOINOK 0";
         }
@@ -73,63 +73,64 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     @Override
     public void search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
 
-        //connections.addAll(client.getConnectedNodes().stream().collect(Collectors.toList()));
-
-        String response = null;
-        if(hops<1) hops = 0;
+        hops--;
+        if(hops<1) hops=0;
 
         boolean hasFile = false;//Flags whether this node contains the file
         boolean fromLocalClient=false; //Flags if the request is from the local client
-        ArrayList<String> files=new ArrayList<String>();
-
-        String searchResults = "";//search results
-        int no_files = 0;//no of search results
+        ArrayList<String> files=new ArrayList<>();
 
         //Get IP of localhost
-        InetAddress IPAddress = null;
-        try {
-            IPAddress = Utility.getMyIp();
-            System.out.println("I am serverImpl 216");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if(requestorIP.equals(IPAddress.toString())){
+        String localIPAddress=Utility.getHostAddress();
+        //Check if from local client
+        if(requestorIP.equals(localIPAddress) && requestorPort.equals(port)){
             fromLocalClient=true;
         }
+        //if not from local client,check in local files
         if(!fromLocalClient){
-            for (String file : fileList) {
-                //If the keyword is contained in the file name as a word or set of words
-                if (file.matches(".*\\b"+keyWord+"\\b.*")) {
-                    hasFile = true;
-                    searchResults += " " + file ;
-                    no_files++;
-                }
-            }
+            //check in local files and send searchOK if present
+            hasFile=checkIfKeyInLocalFiles(keyWord, requestorIP, requestorPort, hops);
         }
+        //if not in local files
         if(!hasFile){
-            if(connections.isEmpty()){
-                response = "I don't have the file and no more connections. Aborting search.";
-            }
-
+            ArrayList<Connection> connections=routingTable.getConnections();
             files= containsKeyWord(neighbourFileList,keyWord);
+            if (!files.isEmpty()){
+                sendToNeighbours(files,keyWord,requestorIP,requestorPort,hops);
+            }else{
+                sendToAllConnections(connections,keyWord,requestorIP,requestorPort,hops);
+            }
         }
+    }
 
-        if (hasFile) {//this node has the keyword
+    private boolean checkIfKeyInLocalFiles(String keyword,String searcherIPAddress,String searcherPort,int hops){
+        boolean hasFile=false;
+        String searchResults = "";//search results
+        int no_files = 0;//no of search results
+        for (String file : fileList) {
+            //If the keyword is contained in the file name as a word or set of words
+            if (file.matches(".*\\b"+keyword+"\\b.*")) {
+                hasFile = true;
+                searchResults += " " + file ;
+                no_files++;
+            }
+        }
+        if(hasFile){
 
-            //Send The requestor that this node has the file
-            response = " SEROK " + no_files + " " + IPAddress.getHostAddress() + " " + port + " " + hops + searchResults;
+            String localIPAddress=Utility.getHostAddress();
+            String result = " SEROK " + no_files + " " + localIPAddress + " " + port + " " + hops + searchResults;
+            String userCommand = Utility.getUniversalCommand(result);
 
             TTransport transport;
             try {
-                transport = new TSocket(requestorIP, Integer.parseInt(requestorPort));
-
+                //Open RPC Connection
+                transport = new TSocket(searcherIPAddress, Integer.parseInt(searcherPort));
                 TProtocol protocol = new TBinaryProtocol(transport);
-
                 NodeService.Client client = new NodeService.Client(protocol);
                 transport.open();
 
-                response = client.handleResult(response);
+                //Send the success result (SEROK) to the requestor
+                client.handleResult(userCommand);
 
                 transport.close();
             } catch (TTransportException e) {
@@ -139,24 +140,30 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             }
 
         }
-        else if (!files.isEmpty()) {//neighbour nodes have the keyword
+        return hasFile;
+    }
 
-            for(String file: files){
-                ArrayList<Connection> connections = neighbourFileList.get(file);
-                if(!connections.isEmpty()){
-
-                    Connection connection = connections.get(0);
+    private void sendToNeighbours(ArrayList<String> files,String keyword,String searcherIPAddress,String searcherPort,int hops){
+        for(String file: files){
+            ArrayList<Connection> connectionsHavingFile = neighbourFileList.get(file);
+            if(!connectionsHavingFile.isEmpty()){
+                Connection connection = connectionsHavingFile.get(0);
+                String IP = connection.getIp();
+                String connectionPort = connection.getPort();
+                hops=hops-1;
+                if(connectionPort.equals(searcherPort) && IP.equals(searcherIPAddress)){
+                    System.out.println("Ignoring because it's the searcher");
+                }else{
                     //Only sends search query to one mapping neighbour if there are many
                     TTransport transport;
                     try {
-                        transport = new TSocket(connection.getIp(), Integer.parseInt(connection.getPort()));
-
+                        //Open RPC Connection
+                        transport = new TSocket(IP, Integer.parseInt(connectionPort));
                         TProtocol protocol = new TBinaryProtocol(transport);
-
                         NodeService.Client client = new NodeService.Client(protocol);
                         transport.open();
 
-                        client.search(keyWord,requestorIP,requestorPort,hops);
+                        client.search(keyword,searcherIPAddress,searcherPort,hops);
 
                         transport.close();
                     } catch (TTransportException e) {
@@ -164,42 +171,42 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
                     } catch (TException e) {
                         e.printStackTrace();
                     }
-
                 }
-
             }
-        } else { //otherwise
-            if (hops > 1) {
-                //number of hops should be checked at the server side by reading search message request
-                //and only forward to client if not expired
-                //forward the message if not expired
+        }
+    }
 
-                Collections.sort(connections, new CustomComparator());
-
+    private void sendToAllConnections(ArrayList<Connection> connections,String keyword,String searcherIPAddress,String searcherPort,int hops){
+        if (hops > 1) {
+            if(connections.isEmpty()){ //has no connections
+                System.out.println("I don't have the file and no more connections. Aborting search.");
+                return;
+            }else{
+                Collections.sort(connections,new CustomComparator());
                 for (Connection connection : connections) {
                     String IP = connection.getIp();
                     String connectionPort = connection.getPort();
+                    if(connectionPort.equals(searcherPort) && IP.equals(searcherIPAddress)){
+                        System.out.println("Ignoring because it's the searcher");
+                    }else{
+                        TTransport transport;
+                        try {
+                            //Open RPC Connection
+                            transport = new TSocket(IP, Integer.parseInt(connectionPort));
+                            TProtocol protocol = new TBinaryProtocol(transport);
+                            NodeService.Client client = new NodeService.Client(protocol);
+                            transport.open();
 
-                    TTransport transport;
-                    try {
-                        transport = new TSocket(IP, Integer.parseInt(connectionPort));
+                            client.search(keyword,searcherIPAddress,searcherPort,hops);
 
-                        TProtocol protocol = new TBinaryProtocol(transport);
-
-                        NodeService.Client client = new NodeService.Client(protocol);
-                        transport.open();
-
-                        client.search(keyWord,requestorIP,requestorPort,hops);
-
-                        transport.close();
-                    } catch (TTransportException e) {
-                        e.printStackTrace();
-                    } catch (TException e) {
-                        e.printStackTrace();
+                            transport.close();
+                        } catch (TTransportException e) {
+                            e.printStackTrace();
+                        } catch (TException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-
-
             }
         }
     }
@@ -213,6 +220,30 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         return "Successfully Connected to you: ip- " + message[3] + " port- " + message[4];
     }
 
+    @Override
+    public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort) throws TException {
+        Connection connection = new Connection(joinedNodeIp, joinedNodePort);
+        //Update neighbour file list with joined nodes file list
+        updateNeighbourFileList((ArrayList<String>)fileList,connection);
+    }
+
+    @Override
+    public String leave(String leaverIp, int leaverPort) throws TException {
+        String result;
+        //Connection will be established; Ip and port will be saved
+        Connection connection = new Connection(leaverIp,Integer.toString(leaverPort));//ip , port
+
+        try {
+            routingTable.removeConnection(connection);
+            result = "0014 LEAVEOK 0";
+        }
+        catch(Exception ex){
+            result = "0017 LEAVEOK 9999";
+        }
+
+        return result;
+    }
+
     private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
         ArrayList<String> files=new ArrayList<String>();
         Set<String> keys = neighbourFileList.keySet();
@@ -224,39 +255,43 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         return  files;
     }
 
-    private void getFileList(Connection connection){//GETFILES Query is GETFILES requester's_ip requester's_port
-        //Request connection file list
-        ArrayList fileList;
+    private void getFileList(Connection connection){//Of joining node
+        ArrayList otherNode_FileList;
         TTransport transport;
         try {
+            //Open RPC Connection
             transport = new TSocket(connection.getIp(), Integer.parseInt(connection.getPort()));
-
             TProtocol protocol = new TBinaryProtocol(transport);
-
             NodeService.Client client = new NodeService.Client(protocol);
             transport.open();
 
-            fileList = (ArrayList<String>)client.getFiles();
+            //Get files of connecting node
+            otherNode_FileList = (ArrayList<String>) client.getFiles();
 
-            System.out.println(fileList.size());
+            //Update my neighbour list with other nodes file list
+            updateNeighbourFileList(otherNode_FileList, connection);
 
-            ArrayList<Connection> existingConnections;
-            for(int i=3;i<fileList.size();++i){
-                if(neighbourFileList.containsKey(fileList.get(i)) && connection!=null){
-                    existingConnections = neighbourFileList.get(fileList.get(i));
-                }else{
-                    existingConnections=new ArrayList<Connection>();
-                }
-                existingConnections.add(connection);
-                System.out.println(fileList.get(i).toString());
-                neighbourFileList.put(fileList.get(i).toString(),existingConnections);
-            }
+            //Send my file list to connecting node
+            client.handleFileList(fileList, nodeIp, port);
 
             transport.close();
         } catch (TTransportException e) {
             e.printStackTrace();
         } catch (TException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updateNeighbourFileList(ArrayList<String> fileList, Connection connection){
+        ArrayList<Connection> existingConnections;
+        for(String fileName: fileList){
+            if(neighbourFileList.containsKey(fileName) && connection!=null){
+                existingConnections = neighbourFileList.get(fileName);
+            }else{
+                existingConnections=new ArrayList<>();
+            }
+            existingConnections.add(connection);
+            neighbourFileList.put(fileName,existingConnections);
         }
     }
 
@@ -277,6 +312,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         if(packet.equals("The searched keyword is present in my list of files."))
             return "The searched keyword is present in my list of files.";
         else{
+            //Extract params from search message returned from client
+            //When the client doesn't have the requested file
             String[] mes = packet.substring(9).split(" ");
             String keyword = mes[0];
             String requestorIp = mes[2];
