@@ -141,7 +141,7 @@ public class RPCClientImpl extends Observable implements Client {
             }
         }
         if(hasBook){
-            consoleMsg = "The searched keyword is present in my list of files.";
+            setConsoleMsg("The searched keyword is present in my list of files.");
             setChanged();
             notifyObservers();
 
@@ -151,7 +151,7 @@ public class RPCClientImpl extends Observable implements Client {
             String packet = " SER " + keyword + " " + hops + " " + Utility.getHostAddress() + " " + port;
 
             String userCommand = Utility.getUniversalCommand(packet);
-            consoleMsg = "Search request is forwarded to the network";
+            setConsoleMsg("Search request is forwarded to the network");
             setChanged();
             notifyObservers();
 
