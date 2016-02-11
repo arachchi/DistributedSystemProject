@@ -180,7 +180,6 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         if (hops > 1) {
             if(connections.isEmpty()){ //has no connections
                 System.out.println("I don't have the file and no more connections. Aborting search.");
-                return;
             }else{
                 Collections.sort(connections,new CustomComparator());
                 for (Connection connection : connections) {

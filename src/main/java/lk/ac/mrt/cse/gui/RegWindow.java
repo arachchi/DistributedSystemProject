@@ -75,7 +75,7 @@ public class RegWindow extends JFrame {
                     server.setUserName(username);
                     Client client;
                     if (rpc)
-                        client = new RPCClientImpl(server.getFileList(), localPort, bsIP, Integer.parseInt(bsPort), username);
+                        client = new RPCClientImpl(server.getRoutingTable(), server.getFileList(), localPort, bsIP, Integer.parseInt(bsPort), username);
                     else
                         client = new ClientImpl(server.getRoutingTable(), server.getFileList(), localPort, bsIP, Integer.parseInt(bsPort), username);
                     server.setClient(client);
@@ -110,13 +110,13 @@ public class RegWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 server.joinNetwork();
-                ArrayList<Connection> con = server.getClient().getConnectedNodes();
+                //ArrayList<Connection> con = server.getClient().getConnectedNodes();
 
-                for (Connection conn : con) {
-                    System.out.println(conn);
-                }
+                //for (Connection conn : con) {
+                    //System.out.println(conn);
+                //}
 
-                server.setConnectedNodesList(con);
+                //server.setConnectedNodesList(con);
             }
         });
         bookSearchButton.addActionListener(new ActionListener() {
