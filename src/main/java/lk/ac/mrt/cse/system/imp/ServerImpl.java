@@ -86,7 +86,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void requestProcess(String query){
 
-        consoleMsg = "In requestProcess";
+       // consoleMsg = "In requestProcess";
         setChanged();
         notifyObservers();
 
@@ -122,7 +122,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
                 setConsoleMsg("SER  "+message[2]);
                 search(message);
             }else if(message[1].equals("SEROK")){
-                String endTime = "Search end time : "+System.currentTimeMillis()/1000;
+                String endTime = "Search end time : "+System.currentTimeMillis();
                 setConsoleMsg(endTime+" SEROK "+message[6]);
                 System.out.println(endTime+" SEROK "+message[6]);
             }
@@ -290,6 +290,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             String packet = " SEROK " + no_files + " " + localIPAddress + " " + port + " " + hops + searchResults;
             String userCommand = Utility.getUniversalCommand(packet);
             Utility.sendRequest(userCommand, searcherIPAddress, searcherPort);
+            setConsoleMsg("Searched Keyword is present in my file list");
 
         }
         return hasFile;
@@ -339,13 +340,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public String search(String message) {
-        String startTime = "Search start time : "+System.currentTimeMillis()/1000;
+        String startTime = "Search start time : "+System.currentTimeMillis();
         setConsoleMsg(startTime);
         System.out.println(startTime);
         String packet = client.search(message);
 
         if (packet.equals("The searched keyword is present in my list of files.")){
-            String endTime = "Search end time : "+System.currentTimeMillis()/1000;
+            String endTime = "Search end time : "+System.currentTimeMillis();
             String result = endTime+ "\nThe searched keyword is present in my list of files.";
             setConsoleMsg(endTime+ "\nThe searched keyword is present in my list of files.");
             setSearchMsg(startTime+"\n"+result);
@@ -355,7 +356,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             String[] mes = packet.split(" ");;
             search(mes);
         }
-        String result = System.currentTimeMillis()/1000+"  Search request is forwarded to the network";
+        String result = System.currentTimeMillis()+"  Search request is forwarded to the network";
         setConsoleMsg(result);
         setSearchMsg(result);
         System.out.println(result);
