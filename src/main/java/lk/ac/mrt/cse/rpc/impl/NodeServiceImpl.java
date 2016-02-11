@@ -232,10 +232,11 @@ public class NodeServiceImpl extends  Observable implements NodeService.Iface,Se
 
     @Override
     public String leave(String leaverIp, int leaverPort) throws TException {
+
         String result;
         //Connection will be established; Ip and port will be saved
         Connection connection = new Connection(leaverIp,Integer.toString(leaverPort));//ip , port
-
+        setConsoleMsg("Node leaving network: " + leaverIp +" "+leaverPort);
         try {
             routingTable.removeConnection(connection);
             result = "0014 LEAVEOK 0";

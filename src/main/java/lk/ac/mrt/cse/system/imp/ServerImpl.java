@@ -134,6 +134,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }else if(message[1].equals("LEAVE")){
                 //Connection will be established; Ip and port will be saved
                 Connection connection = new Connection(message[2],message[3]);//ip , port
+                setConsoleMsg("Node leaving network: " + message[2] +" "+message[3]);
 
                 try {
                     routingTable.removeConnection(connection);
