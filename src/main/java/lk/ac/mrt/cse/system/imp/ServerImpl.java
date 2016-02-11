@@ -118,13 +118,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
             else if(message[1].equals("SER")){
                 //String[] content = {message[2],message[3],message[4],message[5]};
-                System.out.println("SER  "+message);
-                setConsoleMsg("SER  "+message);
+                System.out.println("SER  "+message[2]);
+                setConsoleMsg("SER  "+message[2]);
                 search(message);
             }else if(message[1].equals("SEROK")){
                 String endTime = "Search end time : "+System.currentTimeMillis()/1000;
-                setConsoleMsg(endTime+" SEROK "+message);
-                System.out.println(endTime+" SEROK "+message);
+                setConsoleMsg(endTime+" SEROK "+message[6]);
+                System.out.println(endTime+" SEROK "+message[6]);
             }
             else if(message[1].equals("GETFILES")){
                 sendFileList(message);
@@ -180,7 +180,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
         String userCommand = Utility.getUniversalCommand(packet);
         System.out.println("Trying to send a file list "+userCommand);
-        setConsoleMsg("Trying to send a file list "+userCommand);
+        //setConsoleMsg("Trying to send a file list "+userCommand);
         Utility.sendRequest(userCommand, RequesterIPAddress, requestorPort);
         System.out.println("successfully sent a file list " + userCommand);
         setConsoleMsg("successfully sent a file list " + userCommand);
@@ -411,13 +411,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(true);
     }
 
     public void setSearchMsg(String serachMsg) {
         this.searchMsg = searchMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(true);
     }
     public Client getClient() {
         return client;
