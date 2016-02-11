@@ -114,15 +114,17 @@ public class RPCClientImpl extends Observable implements Client {
 
             NodeService.Client client = new NodeService.Client(protocol);
             transport.open();
-
             String result = client.join(nodeIp, Integer.parseInt(port));
             System.out.println("result " + result);
-
             transport.close();
         } catch (TTransportException e) {
             e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
         } catch (TException e) {
             e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
         }
     }
 
