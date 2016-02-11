@@ -187,6 +187,8 @@ public class ClientImpl extends Observable implements Client {
                         System.out.println("failed, can’t register. BS full");
                         setStatus("failed, can’t register. BS full");
                     } else{
+                        System.out.println("Successfully Registered ");
+                        setStatus("Successfully Registered");
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
                             port = serverResponseParts[++index];
@@ -210,8 +212,7 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered ");
-            setStatus("Successfully Registered");
+
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
@@ -288,6 +289,8 @@ public class ClientImpl extends Observable implements Client {
                         System.out.println("failed, there is some error in the command");
                         setStatus("failed, there is some error in the command");
                     } else{
+                        System.out.println("Successfully Unregistered");
+                        setStatus("Successfully Unregistered");
                         //TODO:unregister from the connected nodes
 //                        while(count<noOfNodes){
 //                            ip = serverResponseParts[index];
@@ -312,8 +315,7 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Unregistered");
-            setStatus("Successfully Unregistered");
+
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
