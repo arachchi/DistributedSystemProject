@@ -210,7 +210,7 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered Client IMPL ");
+            System.out.println("Successfully Registered ");
             setStatus("Successfully Registered");
 
             for(Connection con : nodeListbyBS){
