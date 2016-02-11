@@ -39,6 +39,7 @@ public class RPCClientImpl extends Observable implements Client {
 
     private String consoleMsg;
     private ConnectionTable routingTable;
+    boolean isConsole;
 
     private static int BS_Port;
     private static String BS_IP;
@@ -58,6 +59,7 @@ public class RPCClientImpl extends Observable implements Client {
         this.userName = userName;
         consoleMsg="";
         status = "";
+        isConsole = false;
     }
 
 
@@ -374,15 +376,19 @@ public class RPCClientImpl extends Observable implements Client {
 
 
     public void setConsoleMsg(String consoleMsg) {
+        isConsole = true;
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(isConsole);
+        isConsole = false;
     }
 
     public void setStatus(String status) {
+        isConsole = true;
         this.status = status;
         setChanged();
-        notifyObservers();
+        notifyObservers(isConsole);
+        isConsole = false;
     }
 
     @Override

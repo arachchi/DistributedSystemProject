@@ -30,6 +30,10 @@ public class ClientImpl extends Observable implements Client {
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private String consoleMsg;
     ConnectionTable routingTable;
+    boolean isConsole;
+    boolean isStatus;
+
+
 
     private static int BS_Port;
     private static String BS_IP;
@@ -46,6 +50,8 @@ public class ClientImpl extends Observable implements Client {
         this.BS_Port = BS_Port;
         this.userName = userName;
         consoleMsg="";
+        isConsole=false;
+        isStatus = false;
     }
 
 
@@ -95,7 +101,6 @@ public class ClientImpl extends Observable implements Client {
         this.routingTable.addConnections(con);
         //Generating packet to send
         String command = " JOIN " + Utility.getHostAddress() + " " + port;
-
         String packet = Utility.getUniversalCommand(command);
         Utility.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
@@ -319,7 +324,7 @@ public class ClientImpl extends Observable implements Client {
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-                setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+               // setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
@@ -332,15 +337,19 @@ public class ClientImpl extends Observable implements Client {
 
 
     private void setConsoleMessage(String consoleMsg){
+        isConsole = true;
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(isConsole);
+        isConsole = false;
     }
 
     private void setStatus(String status){
+        isStatus = true;
         this.status = status;
         setChanged();
-        notifyObservers();
+        notifyObservers(isStatus);
+        isStatus = false;
     }
 
     public String getStatus(){return status;}

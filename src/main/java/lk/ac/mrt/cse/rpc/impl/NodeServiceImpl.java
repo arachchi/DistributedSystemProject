@@ -385,7 +385,7 @@ public class NodeServiceImpl extends  Observable implements NodeService.Iface,Se
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(true);
     }
 
     public Client getClient() {
