@@ -468,10 +468,12 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     @Override
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
+        String nodes = "";
         for(int i=0;i<firstTwoNodes.size();++i){
             routingTable.addConnections(firstTwoNodes.get(i));
-            setConsoleMsg("Added connection :" +firstTwoNodes.get(i).getIp()+","+firstTwoNodes.get(i).getPort());
+            nodes += "Added connection :" +firstTwoNodes.get(i).getIp()+","+firstTwoNodes.get(i).getPort();
         }
+        setConsoleMsg(nodes);
     }
 
     public int getSize() {

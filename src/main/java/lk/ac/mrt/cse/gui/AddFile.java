@@ -2,6 +2,7 @@ package lk.ac.mrt.cse.gui;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import lk.ac.mrt.cse.rpc.impl.NodeServiceImpl;
 import lk.ac.mrt.cse.system.Server;
 
 import javax.swing.*;
@@ -29,7 +30,7 @@ public class AddFile extends JFrame {
     private static ArrayList<String> nodeFileList;
     private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
     private int nodeFileCount = 3;
-    private Server server;
+    final Server server;
     private boolean rpc = true;
 
     public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, final boolean rpc) {
