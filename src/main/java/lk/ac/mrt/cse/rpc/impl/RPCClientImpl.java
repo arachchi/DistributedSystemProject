@@ -188,8 +188,11 @@ public class RPCClientImpl extends Observable implements Client {
             String command = " REG " + ipAddress + " " + port + " " + userName;
 
             String userCommand = Utility.getUniversalCommand(command);
+
             System.out.println("BS_IP "+BS_IP+" port "+BS_Port);
+            setStatus("BS_IP "+BS_IP+" port "+BS_Port);
             setConsoleMsg("BS_IP "+BS_IP+" port "+BS_Port);
+
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
@@ -252,8 +255,8 @@ public class RPCClientImpl extends Observable implements Client {
 
         if(registered){
             System.out.println("Successfully Registered client RPC");
-            setStatus("Successfully Registered \n");
-            setConsoleMsg("Successfully Registered \n");//
+            setStatus("Successfully Registered");
+            setConsoleMsg("Successfully Registered");//
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());

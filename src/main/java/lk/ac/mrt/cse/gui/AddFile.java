@@ -73,7 +73,7 @@ public class AddFile extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                RegWindow regWindow = new RegWindow(server, AddFile.this.rpc);
+                RegWindow regWindow = new RegWindow(server, AddFile.this.rpc, nodeFileList);
                 regWindow.setLocation(x(), y());
                 regWindow.setVisible(true);
             }
