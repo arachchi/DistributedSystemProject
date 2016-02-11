@@ -36,7 +36,7 @@ public class ClientImpl extends Observable implements Client {
     private static String port;
     private static String nodeIp;
     private static String userName;
-    private static String status;
+    private String status;
 
     public ClientImpl(ConnectionTable routingTable,ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
         this.routingTable=routingTable;
@@ -51,9 +51,7 @@ public class ClientImpl extends Observable implements Client {
 
     public void init(){
         System.out.println("In init");
-        consoleMsg = "In Init";
-        setChanged();
-        notifyObservers(consoleMsg);
+        setConsoleMessage("IN init..");
         try {
 
             //Select two nodes to connect
@@ -117,20 +115,14 @@ public class ClientImpl extends Observable implements Client {
             }
         }
         if(hasBook){
-            consoleMsg = "The searched keyword is present in my list of files.";
-            setChanged();
-            notifyObservers();
-
+            setConsoleMessage("The searched keyword is present in my list of files.");
             return "The searched keyword is present in my list of files.";
         }
         else{
             String packet = " SER " + keyword + " " + hops + " " + Utility.getHostAddress() + " " + port;
-
             String userCommand = Utility.getUniversalCommand(packet);
-            consoleMsg = "Search request is forwarded to the network";
-            setChanged();
-            notifyObservers();
 
+            setConsoleMessage("Search request is forwarded to the network");
             //return Node.sendRequest(userCommand, Node.getHostAddress(),""+port);
             return userCommand;
         }
@@ -161,6 +153,7 @@ public class ClientImpl extends Observable implements Client {
 
             String userCommand = Utility.getUniversalCommand(command);
             System.out.println("BS_IP "+BS_IP+" port "+BS_Port);
+            setStatus("BS_IP "+BS_IP+" port "+BS_Port);
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
@@ -171,7 +164,7 @@ public class ClientImpl extends Observable implements Client {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
-                status = "Error Message:" + serverResponseParts[1];
+                setStatus("Error Message:" + serverResponseParts[1]);
             }
             else{
                 if("REGOK".equals(serverResponseParts[1])){
@@ -183,16 +176,16 @@ public class ClientImpl extends Observable implements Client {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
-                        status = "failed, there is some error in the command";
+                        setStatus("failed, there is some error in the command");
                     } else if(noOfNodes == 9998){
                         System.out.println("failed, already registered to you, unregister first");
-                        status = "failed, already registered to you, unregister first";
+                        setStatus("failed, already registered to you, unregister first");
                     } else if(noOfNodes == 9997){
                         System.out.println("failed, registered to another user, try a different IP and port");
-                        status = "failed, registered to another user, try a different IP and port";
+                        setStatus("failed, registered to another user, try a different IP and port");
                     } else if(noOfNodes == 9996){
                         System.out.println("failed, can’t register. BS full");
-                        status = "failed, can’t register. BS full";
+                        setStatus("failed, can’t register. BS full");
                     } else{
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
@@ -217,17 +210,17 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered");
-            status = "Successfully Registered \n";
+            System.out.println("Successfully Registered Client IMPL ");
+            setStatus("Successfully Registered");
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-                status+= con.getIp() + " " + con.getPort() + " " + con.getUserName()+"\n";
+                setStatus( con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
             System.out.println("Registration Failure, Check Again");
-            status = "Registration Failure, Check Again";
+            setStatus("Registration Failure, Check Again");
         }
 
         return registered;
@@ -281,7 +274,7 @@ public class ClientImpl extends Observable implements Client {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
-                status = "Error Message:" + serverResponseParts[1];
+                setStatus("Error Message:" + serverResponseParts[1]);
             }
             else{
                 if("UNROK".equals(serverResponseParts[1])){
@@ -293,7 +286,7 @@ public class ClientImpl extends Observable implements Client {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
-                        status = "failed, there is some error in the command";
+                        setStatus("failed, there is some error in the command");
                     } else{
                         //TODO:unregister from the connected nodes
 //                        while(count<noOfNodes){
@@ -319,20 +312,36 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered");
-            status = "Successfully Registered";
+            System.out.println("Successfully Unregistered");
+            setStatus("Successfully Unregistered");
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+                setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
-            System.out.println("Registration Failure, Check Again");
-            status = "Registration Failure, Check Again";
+            System.out.println("Unregistration Failure, Check Again");
+            setStatus("Unregistration Failure, Check Again");
         }
 
         return registered;
     }
+
+
+    private void setConsoleMessage(String consoleMsg){
+        this.consoleMsg = consoleMsg;
+        setChanged();
+        notifyObservers();
+    }
+
+    private void setStatus(String status){
+        this.status = status;
+        setChanged();
+        notifyObservers();
+    }
+
+    public String getStatus(){return status;}
 
     @Override
     public ArrayList<Connection> getConnectedNodes() {

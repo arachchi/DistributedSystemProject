@@ -16,6 +16,7 @@ public interface Client{
     public String search(String keyword);
     public void addObserver(Observer observer);
     public String getConsoleMsg();
+    public String getStatus();
     public boolean registerToServer();
     public boolean unRegisterToServer();
     public ArrayList<Connection> getConnectedNodes();

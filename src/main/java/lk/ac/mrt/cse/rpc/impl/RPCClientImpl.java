@@ -161,6 +161,9 @@ public class RPCClientImpl extends Observable implements Client {
         return consoleMsg;
     }
 
+    @Override
+    public String getStatus() { return status; }
+
     public boolean registerToServer(){
         //Connect to the bootstrap server and get the list of nodes
         //send these list of nodes to the server instance
@@ -239,7 +242,7 @@ public class RPCClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered");
+            System.out.println("Successfully Registered client RPC");
             status = "Successfully Registered \n";
 
             for(Connection con : nodeListbyBS){
