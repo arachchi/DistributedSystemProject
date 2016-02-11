@@ -166,7 +166,6 @@ public class RegWindow extends JFrame implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("@@@@@@" + server.getClientStatus());
         textArea1.append(server.getClientStatus() + "\n");
     }
 
