@@ -57,7 +57,7 @@ public class ClientImpl extends Observable implements Client {
 
     public void init(){
         System.out.println("In init");
-        setConsoleMessage("In init..");
+       // setConsoleMessage("In init..");
         try {
 
             //Select two nodes to connect
@@ -89,6 +89,7 @@ public class ClientImpl extends Observable implements Client {
                     for( int i =0; i < nodeListbyBS.size(); i++){
                         connectToNode(nodeListbyBS.get(i));
                     }
+                    setConsoleMessage("Joined With Network..");
                 }
             }
 
