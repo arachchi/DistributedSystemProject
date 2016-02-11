@@ -114,15 +114,17 @@ public class RPCClientImpl extends Observable implements Client {
 
             NodeService.Client client = new NodeService.Client(protocol);
             transport.open();
-
             String result = client.join(nodeIp, Integer.parseInt(port));
             System.out.println("result " + result);
-
             transport.close();
         } catch (TTransportException e) {
             e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
         } catch (TException e) {
             e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
         }
     }
 
@@ -141,7 +143,7 @@ public class RPCClientImpl extends Observable implements Client {
             }
         }
         if(hasBook){
-            consoleMsg = "The searched keyword is present in my list of files.";
+            setConsoleMsg("The searched keyword is present in my list of files.");
             setChanged();
             notifyObservers();
 
@@ -151,7 +153,7 @@ public class RPCClientImpl extends Observable implements Client {
             String packet = " SER " + keyword + " " + hops + " " + Utility.getHostAddress() + " " + port;
 
             String userCommand = Utility.getUniversalCommand(packet);
-            consoleMsg = "Search request is forwarded to the network";
+            setConsoleMsg("Search request is forwarded to the network");
             setChanged();
             notifyObservers();
 
