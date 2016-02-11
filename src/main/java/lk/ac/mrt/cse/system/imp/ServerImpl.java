@@ -234,39 +234,38 @@ public class ServerImpl extends Observable implements Runnable,Server {
         }
     }
 
-    public void search(String[] message) {//Search Query is SER filename no_of_hops searcher's_ip searcher's_port//search query runs here
+    public void search(String[] message){//Search Query is SER filename no_of_hops searcher's_ip searcher's_port//search query runs here
         String keyword = message[2];
-        int hops = Integer.parseInt(message[3]) - 1;
-        if (hops < 1) hops = 0;
+        int hops = Integer.parseInt(message[3])-1;
+        if(hops<1) hops = 0;
         String searcherIPAddress = message[4];
         String searcherPort = message[5];
         boolean hasFile = false;//Flags whether this node contains the file
-        boolean fromLocalClient = false; //Flags if the request is from the local client
-        ArrayList<String> files = new ArrayList<String>();
+        boolean fromLocalClient=false; //Flags if the request is from the local client
+        ArrayList<String> files=new ArrayList<String>();
 
         //Get IP of localhost
-        String localIPAddress = Utility.getHostAddress();
+        String localIPAddress=Utility.getHostAddress();
         //Check if from local client
-        if (searcherIPAddress.equals(localIPAddress) && searcherPort.equals(port)) {
-            fromLocalClient = true;
+        if(searcherIPAddress.equals(localIPAddress) && searcherPort.equals(port)){
+            fromLocalClient=true;
         }
         //if not from local client,check in local files
-        if (!fromLocalClient) {
+        if(!fromLocalClient){
             //check in local files and send searchOK if present
-            hasFile = checkIfKeyInLocalFiles(keyword, searcherIPAddress, searcherPort, hops);
+            hasFile=checkIfKeyInLocalFiles(keyword,searcherIPAddress,searcherPort,hops);
         }
         //if not in local files
-        if (!hasFile) {
-            ArrayList<Connection> connections = routingTable.getConnections();
-            files = containsKeyWord(neighbourFileList, keyword);
-            if (!files.isEmpty()) {
-                sendToNeighbours(files, keyword, searcherIPAddress, searcherPort, hops);
-            } else {
-                sendToAllConnections(connections, keyword, searcherIPAddress, searcherPort, hops);
+        if(!hasFile){
+            ArrayList<Connection> connections=routingTable.getConnections();
+            files= containsKeyWord(neighbourFileList,keyword);
+            if (!files.isEmpty()){
+                sendToNeighbours(files,keyword,searcherIPAddress,searcherPort,hops);
+            }else{
+                sendToAllConnections(connections,keyword,searcherIPAddress,searcherPort,hops);
             }
         }
     }
-
     private boolean checkIfKeyInLocalFiles(String keyword,String searcherIPAddress,String searcherPort,int hops){
         boolean hasFile=false;
         String searchResults = "";//search results
@@ -345,7 +344,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
     @Override
     public void addClientObserver(Observer observer) {
         getClient().addObserver(observer);
-        System.out.println(observer.toString());
     }
 
     @Override
@@ -376,8 +374,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
     public String getClientConsoleMsg(){
         return getClient().getConsoleMsg();
     }
-
-    public String getClientStatus(){ return getClient().getStatus(); }
 
     @Override
     public boolean registerToServer() {
