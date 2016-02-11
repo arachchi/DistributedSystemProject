@@ -51,7 +51,7 @@ public class ClientImpl extends Observable implements Client {
 
     public void init(){
         System.out.println("In init");
-        setConsoleMessage("IN init..");
+        setConsoleMessage("In init..");
         try {
 
             //Select two nodes to connect

@@ -86,7 +86,7 @@ public class RegWindow extends JFrame implements Observer {
                     server.setClient(client);
 
                     boolean registered = false;
-
+                    server.addClientObserver(thisWindow);
                     registered = server.registerToServer();
 
                     if (registered) {
@@ -94,8 +94,7 @@ public class RegWindow extends JFrame implements Observer {
                         serverThread.start();
                         server.addObserver(log);
                         server.addClientObserver(log);
-                        server.addClientObserver(thisWindow);
-                        log.setVisible(true);
+                        //log.setVisible(true);
                         log.setSize(getWidth(), getHeight());
 
                         joinWithNetworkButton.setEnabled(true);
@@ -156,16 +155,7 @@ public class RegWindow extends JFrame implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("Update reg win : ");
-        if (o instanceof ClientImpl) {
-            System.out.println("Update reg win : client impl");
-            Client client = (Client) o;
-            textArea1.setText(client.getStatus());
-        }
-        if (o instanceof Client) {
-            System.out.println("Update reg win : client");
-        }
-
+        textArea1.append(server.getClientStatus() + "\n");
     }
 
     {

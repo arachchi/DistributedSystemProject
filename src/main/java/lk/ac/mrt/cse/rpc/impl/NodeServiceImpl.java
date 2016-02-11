@@ -25,6 +25,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
+    String searchMsg;
     Client client;
     ConnectionTable routingTable;
 
@@ -356,6 +357,21 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
     public String getClientConsoleMsg(){
         return getClient().getConsoleMsg();
+    }
+
+    @Override
+    public String getSearchMsg() {
+        return searchMsg;
+    }
+
+    @Override
+    public void setSearchMsg(String serachMsg) {
+        this.searchMsg = searchMsg;
+    }
+
+    @Override
+    public String getClientStatus() {
+        return getClient().getStatus();
     }
 
     @Override

@@ -9,30 +9,33 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by kulakshi on 1/20/16.
  */
-public class SearchWindow extends JFrame {
+public class SearchWindow extends JFrame implements Observer {
     private JButton searchButton;
     private JTextField textField1;
     private JLabel StatusLabel;
     private JPanel panel1;
     private JButton closeButton;
     private boolean rpc;
+    Server server;
 
     public SearchWindow(final Server server, final boolean rpc) {
         this.rpc = rpc;
+        this.server = server;
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(500, 500);
+        setSize(700, 500);
         setTitle("Client : Search Files");
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String status = server.search(textField1.getText());
-                StatusLabel.setText(status);
+                server.search(textField1.getText());
             }
         });
         closeButton.addActionListener(new ActionListener() {
@@ -45,6 +48,11 @@ public class SearchWindow extends JFrame {
 
     private void close() {
         setVisible(false);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        StatusLabel.setText(server.getSearchMsg());
     }
 
     {
