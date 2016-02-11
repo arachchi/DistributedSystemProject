@@ -4,6 +4,7 @@ package lk.ac.mrt.cse.rpc.impl;
 import lk.ac.mrt.cse.rpc.NodeService;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Utility;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -35,6 +36,7 @@ public class RPCClientImpl extends Observable implements Client {
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private String consoleMsg;
+    private ConnectionTable routingTable;
 
     private static int BS_Port;
     private static String BS_IP;
@@ -43,7 +45,8 @@ public class RPCClientImpl extends Observable implements Client {
     private static String userName;
     private static String status;
 
-    public RPCClientImpl(ArrayList<String> fileList, String port, String BS_IP, int BS_Port, String userName){
+    public RPCClientImpl(ConnectionTable routingTable,ArrayList<String> fileList, String port, String BS_IP, int BS_Port, String userName){
+        this.routingTable = routingTable;
         this.fileList = fileList;
         this.port = port;
         this.BS_IP = BS_IP;
@@ -93,16 +96,13 @@ public class RPCClientImpl extends Observable implements Client {
                 }
             }
 
-            for(Connection con: connectingNodesList){
-                System.out.println("init " + con);
-            }
-
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
     public void connectToNode(Connection con){
+        this.routingTable.addConnections(con);
         TTransport transport;
         try {
             transport = new TSocket(con.getIp(), Integer.parseInt(con.getPort()));
@@ -352,10 +352,6 @@ public class RPCClientImpl extends Observable implements Client {
 
     @Override
     public ArrayList<Connection> getConnectedNodes() {
-
-        for(Connection con: connectingNodesList){
-            System.out.println("getConnectedNodes " + con);
-        }
         return connectingNodesList;
     }
 
