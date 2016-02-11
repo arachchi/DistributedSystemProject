@@ -30,6 +30,12 @@ public interface Server extends Runnable {
 
     public String getClientConsoleMsg();
 
+    public String getSearchMsg();
+
+    public void setSearchMsg(String serachMsg);
+
+    public String getClientStatus();
+
     public boolean registerToServer();
 
     public ArrayList<String> getFileList();

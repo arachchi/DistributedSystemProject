@@ -20,11 +20,12 @@ import java.util.*;
 /**
  * Created by sabra on 2/6/16.
  */
-public class NodeServiceImpl implements NodeService.Iface,Server {
+public class NodeServiceImpl extends  Observable implements NodeService.Iface,Server {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
     String consoleMsg;
+    String searchMsg;
     Client client;
     ConnectionTable routingTable;
 
@@ -180,6 +181,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         if (hops > 1) {
             if(connections.isEmpty()){ //has no connections
                 System.out.println("I don't have the file and no more connections. Aborting search.");
+                setConsoleMsg("I don't have the file and no more connections. Aborting search.");
             }else{
                 Collections.sort(connections,new CustomComparator());
                 for (Connection connection : connections) {
@@ -214,6 +216,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public String handleResult(String result) throws TException {
 
         String[] message = result.split(" ");
+
+        setConsoleMsg("Successfully Connected to you: ip- " + message[3] + " port- " + message[4]);
 
         //Connect to IP and Port to get the file - No Implementation needed
         return "Successfully Connected to you: ip- " + message[3] + " port- " + message[4];
@@ -358,12 +362,29 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     }
 
     @Override
+    public String getSearchMsg() {
+        return searchMsg;
+    }
+
+    @Override
+    public void setSearchMsg(String serachMsg) {
+        this.searchMsg = searchMsg;
+    }
+
+    @Override
+    public String getClientStatus() {
+        return getClient().getStatus();
+    }
+
+    @Override
     public boolean registerToServer() {
         return getClient().registerToServer();
     }
 
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
+        setChanged();
+        notifyObservers();
     }
 
     public Client getClient() {
@@ -418,9 +439,12 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
         connections = firstTwoNodes;
 
+        String nodes = "Joining to : \n";
         for(Connection con: connections){
             System.out.println(con);
+            nodes += con+"";
         }
+        setConsoleMsg(nodes);
     }
 
     public ConnectionTable getRoutingTable() {

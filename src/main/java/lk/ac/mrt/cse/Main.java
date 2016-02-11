@@ -30,6 +30,7 @@ public class Main {
             server = new NodeServiceImpl(routingTable,nodeFileList);
         else
             server = new ServerImpl(routingTable,nodeFileList);
+
         AddFile addFile = new AddFile(server,totalFilesList,nodeFileList,rpc);
         addFile.setVisible(true);
 

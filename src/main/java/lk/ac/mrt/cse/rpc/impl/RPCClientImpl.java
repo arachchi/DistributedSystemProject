@@ -35,6 +35,8 @@ public class RPCClientImpl extends Observable implements Client {
     private int connectingNodeCount = 2;
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+
+
     private String consoleMsg;
     private ConnectionTable routingTable;
 
@@ -46,6 +48,8 @@ public class RPCClientImpl extends Observable implements Client {
     private static String status;
 
     public RPCClientImpl(ConnectionTable routingTable,ArrayList<String> fileList, String port, String BS_IP, int BS_Port, String userName){
+
+
         this.routingTable = routingTable;
         this.fileList = fileList;
         this.port = port;
@@ -53,14 +57,13 @@ public class RPCClientImpl extends Observable implements Client {
         this.BS_Port = BS_Port;
         this.userName = userName;
         consoleMsg="";
+        status = "";
     }
 
 
     public void init(){
         System.out.println("RPC Client : In init");
-        consoleMsg = "In Init";
-        setChanged();
-        notifyObservers(consoleMsg);
+        setConsoleMsg("RPC Client : Initiated");
         try {
 
             //Select two nodes to connect
@@ -186,6 +189,8 @@ public class RPCClientImpl extends Observable implements Client {
 
             String userCommand = Utility.getUniversalCommand(command);
             System.out.println("BS_IP "+BS_IP+" port "+BS_Port);
+            setStatus("BS_IP "+BS_IP+" port "+BS_Port);
+            setConsoleMsg("BS_IP "+BS_IP+" port "+BS_Port);
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
@@ -196,7 +201,8 @@ public class RPCClientImpl extends Observable implements Client {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
-                status = "Error Message:" + serverResponseParts[1];
+                setConsoleMsg("Error Message:" + serverResponseParts[1]);
+                setStatus("Error Message:" + serverResponseParts[1]);
             }
             else{
                 if("REGOK".equals(serverResponseParts[1])){
@@ -208,17 +214,24 @@ public class RPCClientImpl extends Observable implements Client {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
-                        status = "failed, there is some error in the command";
+                        setConsoleMsg("failed, there is some error in the command");
+                        setStatus("failed, there is some error in the command");
                     } else if(noOfNodes == 9998){
                         System.out.println("failed, already registered to you, unregister first");
-                        status = "failed, already registered to you, unregister first";
+                        setConsoleMsg("failed, already registered to you, unregister first");
+                        setStatus("failed, already registered to you, unregister first");
                     } else if(noOfNodes == 9997){
                         System.out.println("failed, registered to another user, try a different IP and port");
-                        status = "failed, registered to another user, try a different IP and port";
+                        setConsoleMsg("failed, registered to another user, try a different IP and port");
+                        setStatus("failed, registered to another user, try a different IP and port");
                     } else if(noOfNodes == 9996){
                         System.out.println("failed, can’t register. BS full");
-                        status = "failed, can’t register. BS full";
+                        setConsoleMsg("failed, can’t register. BS full");
+                        setStatus("failed, can’t register. BS full");
                     } else{
+                        System.out.println("Successfully Registered client RPC");
+                        setStatus("Successfully Registered \n");
+                        setConsoleMsg("Successfully Registered \n");//
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
                             port = serverResponseParts[++index];
@@ -242,17 +255,17 @@ public class RPCClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered client RPC");
-            status = "Successfully Registered \n";
+
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-                status+= con.getIp() + " " + con.getPort() + " " + con.getUserName()+"\n";
+                setConsoleMsg("Node in network :"+con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
             System.out.println("Registration Failure, Check Again");
-            status = "Registration Failure, Check Again";
+            setStatus("Registration Failure, Check Again");
+            setConsoleMsg("Registration Failure, Check Again");
         }
 
         return registered;
@@ -297,7 +310,8 @@ public class RPCClientImpl extends Observable implements Client {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
-                status = "Error Message:" + serverResponseParts[1];
+                setStatus("Error Message:" + serverResponseParts[1]);
+                setConsoleMsg("Error Message:" + serverResponseParts[1]);
             }
             else{
                 if("UNROK".equals(serverResponseParts[1])){
@@ -309,8 +323,12 @@ public class RPCClientImpl extends Observable implements Client {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
-                        status = "failed, there is some error in the command";
+                        setConsoleMsg("failed, there is some error in the command");
+                        setStatus("failed, there is some error in the command");
                     } else{
+                        System.out.println("Successfully Unregistered");
+                        setStatus("Successfully Unregistered");
+                        setConsoleMsg("Successfully Unregistered");
                         //TODO:unregister from the connected nodes
 //                        while(count<noOfNodes){
 //                            ip = serverResponseParts[index];
@@ -335,19 +353,34 @@ public class RPCClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered");
-            status = "Successfully Registered";
+
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+
             }
         }
         else{
-            System.out.println("Registration Failure, Check Again");
-            status = "Registration Failure, Check Again";
+            System.out.println("Unregistration Failure, Check Again");
+            setStatus("Unregistration Failure, Check Again");
+            setConsoleMsg("Unregistration Failure, Check Again");
         }
 
         return registered;
+    }
+
+
+
+    public void setConsoleMsg(String consoleMsg) {
+        this.consoleMsg = consoleMsg;
+        setChanged();
+        notifyObservers();
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+        setChanged();
+        notifyObservers();
     }
 
     @Override

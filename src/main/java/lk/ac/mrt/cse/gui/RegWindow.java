@@ -43,7 +43,7 @@ public class RegWindow extends JFrame implements Observer {
     String username = "";
     Server server;
 
-    public RegWindow(final Server server, final boolean rpc) {
+    public RegWindow(final Server server, final boolean rpc, final ArrayList<String> nodeFileList) {
         final ServerLog log = new ServerLog(server, rpc);
 
         this.server = server;
@@ -54,6 +54,9 @@ public class RegWindow extends JFrame implements Observer {
         setTitle("Client : Connect with Network");
         joinWithNetworkButton.setEnabled(false);
         selectRPCCheckBox.setEnabled(false);
+
+        textArea1.append(displayList(nodeFileList)+"\n--------------------");
+
 
         if (rpc) {
             selectRPCCheckBox.setSelected(true);
@@ -86,7 +89,7 @@ public class RegWindow extends JFrame implements Observer {
                     server.setClient(client);
 
                     boolean registered = false;
-
+                    server.addClientObserver(thisWindow);
                     registered = server.registerToServer();
 
                     if (registered) {
@@ -94,8 +97,7 @@ public class RegWindow extends JFrame implements Observer {
                         serverThread.start();
                         server.addObserver(log);
                         server.addClientObserver(log);
-                        server.addClientObserver(thisWindow);
-                        log.setVisible(true);
+                        //log.setVisible(true);
                         log.setSize(getWidth(), getHeight());
 
                         joinWithNetworkButton.setEnabled(true);
@@ -150,22 +152,21 @@ public class RegWindow extends JFrame implements Observer {
     }
 
 
+    private String displayList(ArrayList<String> fileList) {
+        String list = "My File List :";
+        for (String s : fileList) {
+            list += "\n" + s;
+        }
+        return list;
+    }
+
     private void close() {
         System.exit(0);
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("Update reg win : ");
-        if (o instanceof ClientImpl) {
-            System.out.println("Update reg win : client impl");
-            Client client = (Client) o;
-            textArea1.setText(client.getStatus());
-        }
-        if (o instanceof Client) {
-            System.out.println("Update reg win : client");
-        }
-
+        textArea1.append(server.getClientStatus() + "\n");
     }
 
     {
