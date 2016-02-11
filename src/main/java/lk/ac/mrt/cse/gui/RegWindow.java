@@ -7,6 +7,7 @@ import lk.ac.mrt.cse.rpc.impl.RPCClientImpl;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ClientImpl;
+import lk.ac.mrt.cse.system.imp.ServerImpl;
 import lk.ac.mrt.cse.system.model.Connection;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class RegWindow extends JFrame implements Observer {
         joinWithNetworkButton.setEnabled(false);
         selectRPCCheckBox.setEnabled(false);
 
-        textArea1.append(displayList(nodeFileList)+"\n--------------------");
+        textArea1.append(displayList(nodeFileList) + "\n--------------------");
 
 
         if (rpc) {
@@ -76,7 +77,6 @@ public class RegWindow extends JFrame implements Observer {
                     bsPort = textField4.getText();
                     localPort = textField3.getText();
                     username = textField2.getText();
-
                     server.setBS_Port(Integer.parseInt(bsPort));
                     server.setBsIp(bsIP);
                     server.setPort(localPort);
