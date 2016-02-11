@@ -266,10 +266,6 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
         }
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> f58dd3f26d03627132bb092dee794d4dfdd5cd43
     private boolean checkIfKeyInLocalFiles(String keyword,String searcherIPAddress,String searcherPort,int hops){
         boolean hasFile=false;
         String searchResults = "";//search results
