@@ -56,7 +56,7 @@ public class RegWindow extends JFrame implements Observer {
         joinWithNetworkButton.setEnabled(false);
         selectRPCCheckBox.setEnabled(false);
 
-        textArea1.append(displayList(nodeFileList)+"\n--------------------");
+        textArea1.append(displayList(nodeFileList) + "\n--------------------");
 
 
         if (rpc) {
