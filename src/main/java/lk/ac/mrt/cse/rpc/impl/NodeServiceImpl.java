@@ -14,13 +14,14 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.util.*;
 
 /**
  * Created by sabra on 2/6/16.
  */
-public class NodeServiceImpl implements NodeService.Iface,Server {
+public class NodeServiceImpl extends  Observable implements NodeService.Iface,Server {
     ArrayList<String> fileList;
     ArrayList<Connection> connections;// Routing Table
     Hashtable<String, ArrayList<Connection>> neighbourFileList;
@@ -48,6 +49,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public String join(String myIp, int myPort) throws TException {
         //Connection will be established; Ip and port will be saved
         Connection connection = new Connection(myIp,""+myPort);//ip , port
+        System.out.println("Connection Request from " + myIp + " " + myPort );
+
         String packet;
         try {
             routingTable.addConnections(connection);
@@ -60,6 +63,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
         //Get the file list of connection for Updating neighbour file list
         getFileList(connection);
+        System.out.println("Connection from " + myIp + " " + myPort + " success");
+
         return packet;
     }
 
@@ -73,6 +78,16 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
     @Override
     public void search(String keyWord, String requestorIP, String requestorPort, int hops) throws TException {
+
+        System.out.println("*******Routing Table**********");
+        ArrayList<Connection> conList = routingTable.getConnections();
+
+        for(Connection con : conList){
+            System.out.println("**" + con.getIp() + " " + con.getPort());
+        }
+
+        System.out.println("*********Neighbour File List****************");
+        printNeighbourFileList();
 
         hops--;
         if(hops<1) hops=0;
@@ -95,12 +110,30 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         //if not in local files
         if(!hasFile){
             ArrayList<Connection> connections=routingTable.getConnections();
-            files= containsKeyWord(neighbourFileList,keyWord);
+            files= containsKeyWord(keyWord);
             if (!files.isEmpty()){
                 sendToNeighbours(files,keyWord,requestorIP,requestorPort,hops);
             }else{
                 sendToAllConnections(connections,keyWord,requestorIP,requestorPort,hops);
             }
+        }
+    }
+
+    private void printNeighbourFileList(){
+        Set<String> keys = neighbourFileList.keySet();
+        final Object[][] table = new String[keys.size()][];
+        int i=0;
+        for(String key :keys){
+            String listOfFiles="";
+            ArrayList<Connection> connectionsList=neighbourFileList.get(key);
+            for(Connection connection:connectionsList){
+                listOfFiles = listOfFiles.concat(connection.getIp()+"("+connection.getPort()+"),");
+            }
+            table[i] = new String[] { key, listOfFiles};
+            ++i;
+        }
+        for (final Object[] row : table) {
+            System.out.format("%15s%15s\n", row);
         }
     }
 
@@ -183,6 +216,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         if (hops > 1) {
             if(connections.isEmpty()){ //has no connections
                 System.out.println("I don't have the file and no more connections. Aborting search.");
+                setConsoleMsg("I don't have the file and no more connections. Aborting search.");
             }else{
                 Collections.sort(connections,new CustomComparator());
                 for (Connection connection : connections) {
@@ -220,23 +254,34 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
         String[] message = result.split(" ");
 
+        //setConsoleMsg("Successfully Connected to you: ip- " + message[3] + " port- " + message[4]);
+        System.out.println("Successfully Connected to you: ip- " + message[3] + " port- " + message[4]);
+
         //Connect to IP and Port to get the file - No Implementation needed
-        return "Successfully Connected to you: ip- " + message[3] + " port- " + message[4];
+        return "Successfully Connected to you: ip- " + nodeIp + " port- " + port;
     }
 
     @Override
     public void handleFileList(List<String> fileList, String joinedNodeIp, String joinedNodePort) throws TException {
         Connection connection = new Connection(joinedNodeIp, joinedNodePort);
         //Update neighbour file list with joined nodes file list
+
+        String files = "";
+        for(String s : fileList){
+            files = files + s + ",";
+        }
+
+        System.out.println("Got Reply File List " + files + " from " + joinedNodeIp + " " + joinedNodePort);
         updateNeighbourFileList((ArrayList<String>)fileList,connection);
     }
 
     @Override
     public String leave(String leaverIp, int leaverPort) throws TException {
+
         String result;
         //Connection will be established; Ip and port will be saved
         Connection connection = new Connection(leaverIp,Integer.toString(leaverPort));//ip , port
-
+        setConsoleMsg("Node leaving network: " + leaverIp +" "+leaverPort);
         try {
             routingTable.removeConnection(connection);
             result = "0014 LEAVEOK 0";
@@ -248,7 +293,7 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
         return result;
     }
 
-    private ArrayList<String> containsKeyWord(Hashtable<String, ArrayList<Connection>> neighbourFileList,String keyword){
+    private ArrayList<String> containsKeyWord(String keyword){
         ArrayList<String> files=new ArrayList<String>();
         Set<String> keys = neighbourFileList.keySet();
         for(String key :keys){
@@ -260,9 +305,10 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     }
 
     private void getFileList(Connection connection){//Of joining node
-        ArrayList otherNode_FileList;
+        ArrayList<String> otherNode_FileList;
         TTransport transport;
         try {
+
             //Open RPC Connection
             transport = new TSocket(connection.getIp(), Integer.parseInt(connection.getPort()));
             TProtocol protocol = new TBinaryProtocol(transport);
@@ -272,11 +318,27 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
             //Get files of connecting node
             otherNode_FileList = (ArrayList<String>) client.getFiles();
 
+            String files = "";
+            for(String s : otherNode_FileList){
+                files = files + s + ",";
+            }
+
+            System.out.println("Got file list : " + files + " from " + connection.getIp() + " " + connection.getPort());
+
             //Update my neighbour list with other nodes file list
             updateNeighbourFileList(otherNode_FileList, connection);
 
+            printNeighbourFileList();
             //Send my file list to connecting node
-            client.handleFileList(fileList, nodeIp, port);
+            String files1 = "";
+            for(String s : fileList){
+                files1 = files1 + s + ",";
+            }
+            System.out.println("Sending my File list " + files1 + " to " + connection.getIp() + " " +  connection.getPort());
+
+            //Get this node IP
+            String localIPAddress=Utility.getHostAddress();
+            client.handleFileList(fileList, localIPAddress, port);
 
             transport.close();
         } catch (TTransportException e) {
@@ -287,6 +349,14 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     }
 
     private void updateNeighbourFileList(ArrayList<String> fileList, Connection connection){
+
+        System.out.println("In update neighbour file list");
+        for(String file: fileList){
+            System.out.println(file);
+        }
+
+        System.out.println("Connection " + connection.getIp() + " " + connection.getPort());
+
         ArrayList<Connection> existingConnections;
         for(String fileName: fileList){
             if(neighbourFileList.containsKey(fileName) && connection!=null){
@@ -384,6 +454,8 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
+        setChanged();
+        notifyObservers(true);
     }
 
     public Client getClient() {
@@ -438,9 +510,12 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
         connections = firstTwoNodes;
 
+        String nodes = "Joining to : \n";
         for(Connection con: connections){
             System.out.println(con);
+            nodes += con+"";
         }
+        setConsoleMsg(nodes);
     }
 
     public ConnectionTable getRoutingTable() {

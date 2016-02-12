@@ -86,7 +86,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     public void requestProcess(String query){
 
-        consoleMsg = "In requestProcess";
+       // consoleMsg = "In requestProcess";
         setChanged();
         notifyObservers();
 
@@ -118,13 +118,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }
             else if(message[1].equals("SER")){
                 //String[] content = {message[2],message[3],message[4],message[5]};
-                System.out.println("SER  "+message);
-                setConsoleMsg("SER  "+message);
+                System.out.println("SER  "+message[2]);
+                setConsoleMsg("SER  "+message[2]);
                 search(message);
             }else if(message[1].equals("SEROK")){
-                String endTime = "Search end time : "+System.currentTimeMillis()/1000;
-                setConsoleMsg(endTime+" SEROK "+message);
-                System.out.println(endTime+" SEROK "+message);
+                String endTime = "Search end time : "+System.currentTimeMillis();
+                setConsoleMsg(endTime+" SEROK "+message[6]);
+                System.out.println(endTime+" SEROK "+message[6]);
             }
             else if(message[1].equals("GETFILES")){
                 sendFileList(message);
@@ -134,6 +134,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             }else if(message[1].equals("LEAVE")){
                 //Connection will be established; Ip and port will be saved
                 Connection connection = new Connection(message[2],message[3]);//ip , port
+                setConsoleMsg("Node leaving network: " + message[2] +" "+message[3]);
 
                 try {
                     routingTable.removeConnection(connection);
@@ -179,7 +180,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
         String userCommand = Utility.getUniversalCommand(packet);
         System.out.println("Trying to send a file list "+userCommand);
-        setConsoleMsg("Trying to send a file list "+userCommand);
+        //setConsoleMsg("Trying to send a file list "+userCommand);
         Utility.sendRequest(userCommand, RequesterIPAddress, requestorPort);
         System.out.println("successfully sent a file list " + userCommand);
         setConsoleMsg("successfully sent a file list " + userCommand);
@@ -289,6 +290,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             String packet = " SEROK " + no_files + " " + localIPAddress + " " + port + " " + hops + searchResults;
             String userCommand = Utility.getUniversalCommand(packet);
             Utility.sendRequest(userCommand, searcherIPAddress, searcherPort);
+            setConsoleMsg("Searched Keyword is present in my file list");
 
         }
         return hasFile;
@@ -338,13 +340,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
     }
 
     public String search(String message) {
-        String startTime = "Search start time : "+System.currentTimeMillis()/1000;
+        String startTime = "Search start time : "+System.currentTimeMillis();
         setConsoleMsg(startTime);
         System.out.println(startTime);
         String packet = client.search(message);
 
         if (packet.equals("The searched keyword is present in my list of files.")){
-            String endTime = "Search end time : "+System.currentTimeMillis()/1000;
+            String endTime = "Search end time : "+System.currentTimeMillis();
             String result = endTime+ "\nThe searched keyword is present in my list of files.";
             setConsoleMsg(endTime+ "\nThe searched keyword is present in my list of files.");
             setSearchMsg(startTime+"\n"+result);
@@ -354,7 +356,7 @@ public class ServerImpl extends Observable implements Runnable,Server {
             String[] mes = packet.split(" ");;
             search(mes);
         }
-        String result = System.currentTimeMillis()/1000+"  Search request is forwarded to the network";
+        String result = System.currentTimeMillis()+"  Search request is forwarded to the network";
         setConsoleMsg(result);
         setSearchMsg(result);
         System.out.println(result);
@@ -410,13 +412,13 @@ public class ServerImpl extends Observable implements Runnable,Server {
     public void setConsoleMsg(String consoleMsg) {
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(true);
     }
 
     public void setSearchMsg(String serachMsg) {
         this.searchMsg = searchMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(true);
     }
     public Client getClient() {
         return client;
@@ -468,10 +470,12 @@ public class ServerImpl extends Observable implements Runnable,Server {
 
     @Override
     public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes) {
+        String nodes = "";
         for(int i=0;i<firstTwoNodes.size();++i){
             routingTable.addConnections(firstTwoNodes.get(i));
-            setConsoleMsg("Added connection :" +firstTwoNodes.get(i).getIp()+","+firstTwoNodes.get(i).getPort());
+            nodes += "Added connection :" +firstTwoNodes.get(i).getIp()+","+firstTwoNodes.get(i).getPort();
         }
+        setConsoleMsg(nodes);
     }
 
     public int getSize() {

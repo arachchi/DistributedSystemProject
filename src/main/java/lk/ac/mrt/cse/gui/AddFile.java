@@ -2,7 +2,9 @@ package lk.ac.mrt.cse.gui;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import lk.ac.mrt.cse.rpc.impl.NodeServiceImpl;
 import lk.ac.mrt.cse.system.Server;
+import lk.ac.mrt.cse.system.imp.ServerImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,8 +31,9 @@ public class AddFile extends JFrame {
     private static ArrayList<String> nodeFileList;
     private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
     private int nodeFileCount = 3;
-    private Server server;
+    final Server server;
     private boolean rpc = true;
+    private boolean sysRpc = true;
 
     public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, final boolean rpc) {
         this.totalFilesList = totalFilesList;
@@ -72,7 +75,12 @@ public class AddFile extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                RegWindow regWindow = new RegWindow(server, AddFile.this.rpc);
+                Server sysServer;
+                if (sysRpc)
+                    sysServer = new NodeServiceImpl(server.getRoutingTable(), server.getFileList());
+                else
+                    sysServer = new ServerImpl(server.getRoutingTable(), server.getFileList());
+                RegWindow regWindow = new RegWindow(sysServer, AddFile.this.rpc, nodeFileList);
                 regWindow.setLocation(x(), y());
                 regWindow.setVisible(true);
             }
@@ -87,8 +95,10 @@ public class AddFile extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (addRPCCheckBox.isSelected()) {
+                    sysRpc = true;
                     setRpc(true);
                 } else {
+                    sysRpc = false;
                     setRpc(false);
                 }
             }

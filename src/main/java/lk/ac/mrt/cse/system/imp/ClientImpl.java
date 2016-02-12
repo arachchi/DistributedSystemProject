@@ -30,6 +30,10 @@ public class ClientImpl extends Observable implements Client {
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
     private String consoleMsg;
     ConnectionTable routingTable;
+    boolean isConsole;
+    boolean isStatus;
+
+
 
     private static int BS_Port;
     private static String BS_IP;
@@ -46,12 +50,14 @@ public class ClientImpl extends Observable implements Client {
         this.BS_Port = BS_Port;
         this.userName = userName;
         consoleMsg="";
+        isConsole=false;
+        isStatus = false;
     }
 
 
     public void init(){
         System.out.println("In init");
-        setConsoleMessage("In init..");
+       // setConsoleMessage("In init..");
         try {
 
             //Select two nodes to connect
@@ -83,6 +89,7 @@ public class ClientImpl extends Observable implements Client {
                     for( int i =0; i < nodeListbyBS.size(); i++){
                         connectToNode(nodeListbyBS.get(i));
                     }
+                    setConsoleMessage("Joined With Network..");
                 }
             }
 
@@ -95,7 +102,6 @@ public class ClientImpl extends Observable implements Client {
         this.routingTable.addConnections(con);
         //Generating packet to send
         String command = " JOIN " + Utility.getHostAddress() + " " + port;
-
         String packet = Utility.getUniversalCommand(command);
         Utility.sendRequest(packet, con.getIp(), "" + con.getPort());
     }
@@ -187,6 +193,8 @@ public class ClientImpl extends Observable implements Client {
                         System.out.println("failed, can’t register. BS full");
                         setStatus("failed, can’t register. BS full");
                     } else{
+                        System.out.println("Successfully Registered ");
+                        setStatus("Successfully Registered");
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
                             port = serverResponseParts[++index];
@@ -210,8 +218,7 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Registered ");
-            setStatus("Successfully Registered");
+
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
@@ -288,6 +295,8 @@ public class ClientImpl extends Observable implements Client {
                         System.out.println("failed, there is some error in the command");
                         setStatus("failed, there is some error in the command");
                     } else{
+                        System.out.println("Successfully Unregistered");
+                        setStatus("Successfully Unregistered");
                         //TODO:unregister from the connected nodes
 //                        while(count<noOfNodes){
 //                            ip = serverResponseParts[index];
@@ -312,12 +321,11 @@ public class ClientImpl extends Observable implements Client {
         }
 
         if(registered){
-            System.out.println("Successfully Unregistered");
-            setStatus("Successfully Unregistered");
+
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-                setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+               // setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
@@ -330,15 +338,19 @@ public class ClientImpl extends Observable implements Client {
 
 
     private void setConsoleMessage(String consoleMsg){
+        isConsole = true;
         this.consoleMsg = consoleMsg;
         setChanged();
-        notifyObservers();
+        notifyObservers(isConsole);
+        isConsole = false;
     }
 
     private void setStatus(String status){
+        isStatus = true;
         this.status = status;
         setChanged();
-        notifyObservers();
+        notifyObservers(isStatus);
+        isStatus = false;
     }
 
     public String getStatus(){return status;}

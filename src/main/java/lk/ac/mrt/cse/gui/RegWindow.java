@@ -7,6 +7,7 @@ import lk.ac.mrt.cse.rpc.impl.RPCClientImpl;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ClientImpl;
+import lk.ac.mrt.cse.system.imp.ServerImpl;
 import lk.ac.mrt.cse.system.model.Connection;
 
 import javax.swing.*;
@@ -43,7 +44,7 @@ public class RegWindow extends JFrame implements Observer {
     String username = "";
     Server server;
 
-    public RegWindow(final Server server, final boolean rpc) {
+    public RegWindow(final Server server, final boolean rpc, final ArrayList<String> nodeFileList) {
         final ServerLog log = new ServerLog(server, rpc);
 
         this.server = server;
@@ -54,6 +55,9 @@ public class RegWindow extends JFrame implements Observer {
         setTitle("Client : Connect with Network");
         joinWithNetworkButton.setEnabled(false);
         selectRPCCheckBox.setEnabled(false);
+
+        textArea1.append(displayList(nodeFileList) + "\n--------------------");
+
 
         if (rpc) {
             selectRPCCheckBox.setSelected(true);
@@ -149,13 +153,21 @@ public class RegWindow extends JFrame implements Observer {
     }
 
 
+    private String displayList(ArrayList<String> fileList) {
+        String list = "My File List :";
+        for (String s : fileList) {
+            list += "\n" + s;
+        }
+        return list;
+    }
+
     private void close() {
         System.exit(0);
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        textArea1.append(server.getClientStatus() + "\n");
+        if((boolean)arg)  textArea1.append(server.getClientStatus() + "\n");
     }
 
     {
