@@ -168,6 +168,7 @@ public class RPCClientImpl extends Observable implements Client {
         }
         if(hasBook){
             setConsoleMsg("The searched keyword is present in my list of files.");
+            System.out.println("The searched keyword is present in my list of files.");
             setChanged();
             notifyObservers();
 
@@ -178,6 +179,7 @@ public class RPCClientImpl extends Observable implements Client {
 
             String userCommand = Utility.getUniversalCommand(packet);
             setConsoleMsg("Search request is forwarded to the network");
+            System.out.println("Search request is forwarded to the network");
             setChanged();
             notifyObservers();
 
@@ -311,7 +313,7 @@ public class RPCClientImpl extends Observable implements Client {
             //String userName = inFromUser.readLine();
 
             InetAddress IP = Utility.getMyIp();
-            System.out.println("I am clientImpl 245");
+
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -343,16 +345,37 @@ public class RPCClientImpl extends Observable implements Client {
                 if("UNROK".equals(serverResponseParts[1])){
 
                     int noOfNodes = Integer.parseInt(serverResponseParts[2]);
-                    int count=0;
-                    int index = 3;
-                    String ip, port, username;
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
                         setConsoleMsg("failed, there is some error in the command");
                         setStatus("failed, there is some error in the command");
                     } else{
+
                         System.out.println("Successfully Unregistered");
+                        //Leave From All Connected Nodes
+                        for(Connection con: routingTable.getConnections()){
+                            TTransport transport;
+                            try {
+                                //Open RPC Connection
+                                transport = new TSocket(con.getIp(), Integer.parseInt(con.getPort()));
+                                TProtocol protocol = new TBinaryProtocol(transport);
+                                NodeService.Client client = new NodeService.Client(protocol);
+                                transport.open();
+
+                                String response = client.leave(nodeIp, Integer.parseInt(port));
+                                System.out.println(response);
+
+                                transport.close();
+                            } catch (TTransportException e) {
+                                System.out.println("Failure to connect to searching node: " + con.getIp() + " " + con.getPort());
+                            } catch (TException e) {
+                                System.out.println("Failure to connect to searching node: " + con.getIp() + " " + con.getPort());
+                            }
+
+                        }
+
+
                         setStatus("Successfully Unregistered");
                         setConsoleMsg("Successfully Unregistered");
                         //TODO:unregister from the connected nodes
@@ -379,7 +402,6 @@ public class RPCClientImpl extends Observable implements Client {
         }
 
         if(registered){
-
 
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
