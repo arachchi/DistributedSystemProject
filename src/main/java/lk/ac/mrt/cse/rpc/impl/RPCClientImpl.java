@@ -76,11 +76,33 @@ public class RPCClientImpl extends Observable implements Client {
                     Random rand = new Random();
                     int randomNum;
 
-                    for (int i = 0; i < connectingNodeCount; i++) {
-                        randomNum = rand.nextInt(max);
-                        if(randomNum>=max)
-                            randomNum= max-1;
+                    int count=0;
+                    boolean alreadyInList = false;
+
+                    while(count<connectingNodeCount){
+
+                        randomNum = rand.nextInt();
+                        if(randomNum>=max) {
+                            randomNum = max - 1;
+                        }
+
+                        for(int i =0; i < connectingNodesList.size(); i++){
+                            Connection con1 = connectingNodesList.get(i);
+                            Connection con2 = nodeListbyBS.get(randomNum);
+
+                            if(con1.getIp().equals(con2.getIp()) && con1.getPort().equals(con2.getPort())){
+                                alreadyInList = true;
+                                break;
+                            }
+
+                        }
+
+                        if(alreadyInList){
+                            continue;
+                        }
+
                         connectingNodesList.add(nodeListbyBS.get(randomNum));
+                        count++;
                     }
 
                     //Connect to the selected nodes

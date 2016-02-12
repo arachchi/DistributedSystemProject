@@ -135,9 +135,9 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
                 transport.close();
             } catch (TTransportException e) {
-                e.printStackTrace();
+                System.out.println("Failure to connect to searching node: " + searcherIPAddress + " " + searcherPort);
             } catch (TException e) {
-                e.printStackTrace();
+                System.out.println("Failure to connect to searching node: " + searcherIPAddress + " " + searcherPort);
             }
 
         }
@@ -168,9 +168,11 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
                         transport.close();
                     } catch (TTransportException e) {
-                        e.printStackTrace();
+                        System.out.println("Failure to connect to neighbouring node: "
+                                + IP + " " + connectionPort);
                     } catch (TException e) {
-                        e.printStackTrace();
+                        System.out.println("Failure to connect to neighbouring node:"
+                                + IP + " " + connectionPort);
                     }
                 }
             }
@@ -201,9 +203,11 @@ public class NodeServiceImpl implements NodeService.Iface,Server {
 
                             transport.close();
                         } catch (TTransportException e) {
-                            e.printStackTrace();
+                            System.out.println("Failure to connect to connection node: "
+                                    + IP + " " + connectionPort);
                         } catch (TException e) {
-                            e.printStackTrace();
+                            System.out.println("Failure to connect to connection node: "
+                                    + IP + " " + connectionPort);
                         }
                     }
                 }
