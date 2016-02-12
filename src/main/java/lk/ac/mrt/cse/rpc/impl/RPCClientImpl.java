@@ -1,10 +1,17 @@
-package lk.ac.mrt.cse.system.imp;
+package lk.ac.mrt.cse.rpc.impl;
 
 
+import lk.ac.mrt.cse.rpc.NodeService;
 import lk.ac.mrt.cse.system.Client;
 import lk.ac.mrt.cse.system.model.Connection;
 import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Utility;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -22,42 +29,43 @@ import java.util.Random;
  * @version 1.0.
  * @since 1/8/16
  */
-public class ClientImpl extends Observable implements Client {
+public class RPCClientImpl extends Observable implements Client {
     int hops=5;
     private ArrayList<String> fileList;
     private int connectingNodeCount = 2;
     private ArrayList<Connection> connectingNodesList = new ArrayList<Connection>(); //Nodes connected by this node
     private ArrayList<Connection> nodeListbyBS = new ArrayList<Connection>();
+
+
     private String consoleMsg;
-    ConnectionTable routingTable;
+    private ConnectionTable routingTable;
     boolean isConsole;
-    boolean isStatus;
-
-
 
     private static int BS_Port;
     private static String BS_IP;
     private static String port;
     private static String nodeIp;
     private static String userName;
-    private String status;
+    private static String status;
 
-    public ClientImpl(ConnectionTable routingTable,ArrayList<String> fileList,String port,String BS_IP,int BS_Port, String userName){
-        this.routingTable=routingTable;
+    public RPCClientImpl(ConnectionTable routingTable,ArrayList<String> fileList, String port, String BS_IP, int BS_Port, String userName){
+
+
+        this.routingTable = routingTable;
         this.fileList = fileList;
         this.port = port;
         this.BS_IP = BS_IP;
         this.BS_Port = BS_Port;
         this.userName = userName;
         consoleMsg="";
-        isConsole=false;
-        isStatus = false;
+        status = "";
+        isConsole = false;
     }
 
 
     public void init(){
-        System.out.println("In init");
-       // setConsoleMessage("In init..");
+        System.out.println("RPC Client : In init");
+        setConsoleMsg("RPC Client : Initiated");
         try {
 
             //Select two nodes to connect
@@ -73,11 +81,33 @@ public class ClientImpl extends Observable implements Client {
                     Random rand = new Random();
                     int randomNum;
 
-                    for (int i = 0; i < connectingNodeCount; i++) {
-                        randomNum = rand.nextInt(max);
-                        if(randomNum>=max)
-                            randomNum= max-1;
+                    int count=0;
+                    boolean alreadyInList = false;
+
+                    while(count<connectingNodeCount){
+
+                        randomNum = rand.nextInt();
+                        if(randomNum>=max) {
+                            randomNum = max - 1;
+                        }
+
+                        for(int i =0; i < connectingNodesList.size(); i++){
+                            Connection con1 = connectingNodesList.get(i);
+                            Connection con2 = nodeListbyBS.get(randomNum);
+
+                            if(con1.getIp().equals(con2.getIp()) && con1.getPort().equals(con2.getPort())){
+                                alreadyInList = true;
+                                break;
+                            }
+
+                        }
+
+                        if(alreadyInList){
+                            continue;
+                        }
+
                         connectingNodesList.add(nodeListbyBS.get(randomNum));
+                        count++;
                     }
 
                     //Connect to the selected nodes
@@ -87,9 +117,9 @@ public class ClientImpl extends Observable implements Client {
 
                 } else { //Connect to all nodes in the list
                     for( int i =0; i < nodeListbyBS.size(); i++){
+                        connectingNodesList.add(nodeListbyBS.get(i));
                         connectToNode(nodeListbyBS.get(i));
                     }
-                    setConsoleMessage("Joined With Network..");
                 }
             }
 
@@ -100,10 +130,26 @@ public class ClientImpl extends Observable implements Client {
 
     public void connectToNode(Connection con){
         this.routingTable.addConnections(con);
-        //Generating packet to send
-        String command = " JOIN " + Utility.getHostAddress() + " " + port;
-        String packet = Utility.getUniversalCommand(command);
-        Utility.sendRequest(packet, con.getIp(), "" + con.getPort());
+        TTransport transport;
+        try {
+            transport = new TSocket(con.getIp(), Integer.parseInt(con.getPort()));
+            System.out.println("IP "+ con.getIp()+" port "+con.getPort());
+            TProtocol protocol = new TBinaryProtocol(transport);
+
+            NodeService.Client client = new NodeService.Client(protocol);
+            transport.open();
+            String result = client.join(nodeIp, Integer.parseInt(port));
+            System.out.println("result " + result);
+            transport.close();
+        } catch (TTransportException e) {
+            e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
+        } catch (TException e) {
+            e.printStackTrace();
+            setConsoleMsg("An error in ports detected.");
+            setStatus("An error in ports detected.");
+        }
     }
 
     public String search(String keyword){
@@ -121,14 +167,22 @@ public class ClientImpl extends Observable implements Client {
             }
         }
         if(hasBook){
-            setConsoleMessage("The searched keyword is present in my list of files.");
+            setConsoleMsg("The searched keyword is present in my list of files.");
+            System.out.println("The searched keyword is present in my list of files.");
+            setChanged();
+            notifyObservers();
+
             return "The searched keyword is present in my list of files.";
         }
         else{
             String packet = " SER " + keyword + " " + hops + " " + Utility.getHostAddress() + " " + port;
-            String userCommand = Utility.getUniversalCommand(packet);
 
-            setConsoleMessage("Search request is forwarded to the network");
+            String userCommand = Utility.getUniversalCommand(packet);
+            setConsoleMsg("Search request is forwarded to the network");
+            System.out.println("Search request is forwarded to the network");
+            setChanged();
+            notifyObservers();
+
             //return Node.sendRequest(userCommand, Node.getHostAddress(),""+port);
             return userCommand;
         }
@@ -137,6 +191,9 @@ public class ClientImpl extends Observable implements Client {
     public String getConsoleMsg() {
         return consoleMsg;
     }
+
+    @Override
+    public String getStatus() { return status; }
 
     public boolean registerToServer(){
         //Connect to the bootstrap server and get the list of nodes
@@ -152,6 +209,7 @@ public class ClientImpl extends Observable implements Client {
             //String userName = inFromUser.readLine();
 
             InetAddress IP = Utility.getMyIp();
+            System.out.println("I am clientImpl 151");
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -160,6 +218,7 @@ public class ClientImpl extends Observable implements Client {
             String userCommand = Utility.getUniversalCommand(command);
             System.out.println("BS_IP "+BS_IP+" port "+BS_Port);
             setStatus("BS_IP "+BS_IP+" port "+BS_Port);
+            setConsoleMsg("BS_IP "+BS_IP+" port "+BS_Port);
             Socket clientSocket = new Socket(BS_IP, BS_Port);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             outToServer.write(userCommand.getBytes());
@@ -170,6 +229,7 @@ public class ClientImpl extends Observable implements Client {
 
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
+                setConsoleMsg("Error Message:" + serverResponseParts[1]);
                 setStatus("Error Message:" + serverResponseParts[1]);
             }
             else{
@@ -182,19 +242,24 @@ public class ClientImpl extends Observable implements Client {
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
+                        setConsoleMsg("failed, there is some error in the command");
                         setStatus("failed, there is some error in the command");
                     } else if(noOfNodes == 9998){
                         System.out.println("failed, already registered to you, unregister first");
+                        setConsoleMsg("failed, already registered to you, unregister first");
                         setStatus("failed, already registered to you, unregister first");
                     } else if(noOfNodes == 9997){
                         System.out.println("failed, registered to another user, try a different IP and port");
+                        setConsoleMsg("failed, registered to another user, try a different IP and port");
                         setStatus("failed, registered to another user, try a different IP and port");
                     } else if(noOfNodes == 9996){
                         System.out.println("failed, can’t register. BS full");
+                        setConsoleMsg("failed, can’t register. BS full");
                         setStatus("failed, can’t register. BS full");
                     } else{
-                        System.out.println("Successfully Registered ");
-                        setStatus("Successfully Registered");
+                        System.out.println("Successfully Registered client RPC");
+                        setStatus("Successfully Registered \n");
+                        setConsoleMsg("Successfully Registered \n");//
                         while(count<noOfNodes){
                             ip = serverResponseParts[index];
                             port = serverResponseParts[++index];
@@ -222,12 +287,13 @@ public class ClientImpl extends Observable implements Client {
 
             for(Connection con : nodeListbyBS){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-                setStatus( con.getIp() + " " + con.getPort() + " " + con.getUserName());
+                setConsoleMsg("Node in network :"+con.getIp() + " " + con.getPort() + " " + con.getUserName());
             }
         }
         else{
             System.out.println("Registration Failure, Check Again");
             setStatus("Registration Failure, Check Again");
+            setConsoleMsg("Registration Failure, Check Again");
         }
 
         return registered;
@@ -241,22 +307,13 @@ public class ClientImpl extends Observable implements Client {
 
         boolean registered = false;
 
-        //Send leave requests to all connections
-        ArrayList<Connection> connections=routingTable.getConnections();
-        for (Connection connection : connections) {
-            String IP = connection.getIp();
-            String connectionPort = connection.getPort();
-            String packet = " LEAVE "+ Utility.getHostAddress()+" "+port;;
-            String userCommand = Utility.getUniversalCommand(packet);
-            Utility.sendRequest(userCommand, IP, connectionPort);
-        }
-
         try{
             //BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
             // System.out.println("Enter Username to Register with BS");
             //String userName = inFromUser.readLine();
 
             InetAddress IP = Utility.getMyIp();
+
             String ipAddress = IP.getHostAddress();
             nodeIp = ipAddress;
 
@@ -282,21 +339,45 @@ public class ClientImpl extends Observable implements Client {
             if(serverResponseParts.length==2){
                 System.out.println("Error Message:" + serverResponseParts[1]);
                 setStatus("Error Message:" + serverResponseParts[1]);
+                setConsoleMsg("Error Message:" + serverResponseParts[1]);
             }
             else{
                 if("UNROK".equals(serverResponseParts[1])){
 
                     int noOfNodes = Integer.parseInt(serverResponseParts[2]);
-                    int count=0;
-                    int index = 3;
-                    String ip, port, username;
 
                     if(noOfNodes == 9999){
                         System.out.println("failed, there is some error in the command");
+                        setConsoleMsg("failed, there is some error in the command");
                         setStatus("failed, there is some error in the command");
                     } else{
+
                         System.out.println("Successfully Unregistered");
+                        //Leave From All Connected Nodes
+                        for(Connection con: routingTable.getConnections()){
+                            TTransport transport;
+                            try {
+                                //Open RPC Connection
+                                transport = new TSocket(con.getIp(), Integer.parseInt(con.getPort()));
+                                TProtocol protocol = new TBinaryProtocol(transport);
+                                NodeService.Client client = new NodeService.Client(protocol);
+                                transport.open();
+
+                                String response = client.leave(nodeIp, Integer.parseInt(port));
+                                System.out.println(response);
+
+                                transport.close();
+                            } catch (TTransportException e) {
+                                System.out.println("Failure to connect to searching node: " + con.getIp() + " " + con.getPort());
+                            } catch (TException e) {
+                                System.out.println("Failure to connect to searching node: " + con.getIp() + " " + con.getPort());
+                            }
+
+                        }
+
+
                         setStatus("Successfully Unregistered");
+                        setConsoleMsg("Successfully Unregistered");
                         //TODO:unregister from the connected nodes
 //                        while(count<noOfNodes){
 //                            ip = serverResponseParts[index];
@@ -322,22 +403,23 @@ public class ClientImpl extends Observable implements Client {
 
         if(registered){
 
-
             for(Connection con : connectingNodesList){
                 System.out.println(con.getIp() + " " + con.getPort() + " " + con.getUserName());
-               // setStatus(con.getIp() + " " + con.getPort() + " " + con.getUserName());
+
             }
         }
         else{
             System.out.println("Unregistration Failure, Check Again");
             setStatus("Unregistration Failure, Check Again");
+            setConsoleMsg("Unregistration Failure, Check Again");
         }
 
         return registered;
     }
 
 
-    private void setConsoleMessage(String consoleMsg){
+
+    public void setConsoleMsg(String consoleMsg) {
         isConsole = true;
         this.consoleMsg = consoleMsg;
         setChanged();
@@ -345,15 +427,13 @@ public class ClientImpl extends Observable implements Client {
         isConsole = false;
     }
 
-    private void setStatus(String status){
-        isStatus = true;
+    public void setStatus(String status) {
+        isConsole = true;
         this.status = status;
         setChanged();
-        notifyObservers(isStatus);
-        isStatus = false;
+        notifyObservers(isConsole);
+        isConsole = false;
     }
-
-    public String getStatus(){return status;}
 
     @Override
     public ArrayList<Connection> getConnectedNodes() {

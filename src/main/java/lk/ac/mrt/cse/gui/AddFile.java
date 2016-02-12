@@ -1,45 +1,64 @@
 package lk.ac.mrt.cse.gui;
 
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import lk.ac.mrt.cse.rpc.impl.NodeServiceImpl;
 import lk.ac.mrt.cse.system.Server;
+import lk.ac.mrt.cse.system.imp.ServerImpl;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
  * Created by kulakshi on 1/19/16.
  */
-public class AddFile extends JFrame{
+public class AddFile extends JFrame {
     private JButton button1;
     JPanel panel1;
     private JTextField textField1;
     private JTextPane textPane1;
     private JButton nextButton;
     private JButton closeButton;
+    private JCheckBox addRPCCheckBox;
     ArrayList<String> totalFilesList;
     private static ArrayList<String> nodeFileList;
     private String RESOURCE_FILE_PATH = "resources/FileNames.txt";
     private int nodeFileCount = 3;
-    private Server server;
+    final Server server;
+    private boolean rpc = true;
+    private boolean sysRpc = true;
 
-    public AddFile(final Server server,ArrayList<String> totalFilesList,ArrayList<String> nodeFileList) {
+    public AddFile(final Server server, final ArrayList<String> totalFilesList, final ArrayList<String> nodeFileList, final boolean rpc) {
         this.totalFilesList = totalFilesList;
         this.nodeFileList = nodeFileList;
         this.server = server;
+        this.rpc = rpc;
 
         setContentPane(panel1);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocation(500,100);
+        setLocation(500, 100);
         //setLocationRelativeTo(null);
         setSize(500, 500);
         //pack();
         setTitle("Client : Add New Files");
 
-        if(nodeFileList.size()<1){
+        if (rpc) {
+            addRPCCheckBox.setSelected(true);
+        } else {
+            addRPCCheckBox.setSelected(false);
+        }
+
+
+        if (nodeFileList.size() < 1) {
             textPane1.setText("No files are added yet..");
-        }else{
+        } else {
             displayList(nodeFileList);
         }
 
@@ -47,10 +66,8 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 String newFile = textField1.getText();
-                nodeFileList.add(newFile);
-                totalFilesList.add(newFile);
+                textPane1.setText(textPane1.getText() + newFile);
                 writeList(newFile);
-                displayList(nodeFileList);
             }
         });
 
@@ -58,7 +75,12 @@ public class AddFile extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
-                RegWindow regWindow = new RegWindow(server);
+                Server sysServer;
+                if (sysRpc)
+                    sysServer = new NodeServiceImpl(server.getRoutingTable(), server.getFileList());
+                else
+                    sysServer = new ServerImpl(server.getRoutingTable(), server.getFileList());
+                RegWindow regWindow = new RegWindow(sysServer, AddFile.this.rpc, nodeFileList);
                 regWindow.setLocation(x(), y());
                 regWindow.setVisible(true);
             }
@@ -69,34 +91,103 @@ public class AddFile extends JFrame{
                 close();
             }
         });
+        addRPCCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (addRPCCheckBox.isSelected()) {
+                    sysRpc = true;
+                    setRpc(true);
+                } else {
+                    sysRpc = false;
+                    setRpc(false);
+                }
+            }
+        });
     }
-    private int x(){
+
+    private int x() {
         return getX();
     }
-    private int y(){
+
+    private int y() {
         return getY();
     }
 
-    private void displayList(ArrayList<String> fileList){
+    private void setRpc(boolean rpc) {
+        this.rpc = rpc;
+    }
+
+    private void displayList(ArrayList<String> fileList) {
         String list = "";
-        for(String s :fileList){
-            list += s +"\n";
+        for (String s : fileList) {
+            list += s + "\n";
         }
         textPane1.setText(list);
     }
 
 
-    private void writeList(String newFile){
-        try{
+    private void writeList(String newFile) {
+        try {
             PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(RESOURCE_FILE_PATH, true)));
             out1.println(newFile);
             out1.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void close(){
+    private void close() {
         System.exit(0);
+    }
+
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        panel1 = new JPanel();
+        panel1.setLayout(new GridLayoutManager(4, 6, new Insets(5, 5, 5, 5), -1, -1));
+        button1 = new JButton();
+        button1.setText("Add");
+        panel1.add(button1, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("File name");
+        panel1.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Existing files : ");
+        panel1.add(label2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        closeButton = new JButton();
+        closeButton.setText("Close");
+        panel1.add(closeButton, new GridConstraints(3, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        panel1.add(scrollPane1, new GridConstraints(2, 1, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        textPane1 = new JTextPane();
+        textPane1.setText("");
+        scrollPane1.setViewportView(textPane1);
+        textField1 = new JTextField();
+        panel1.add(textField1, new GridConstraints(0, 1, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        nextButton = new JButton();
+        nextButton.setText("Next");
+        panel1.add(nextButton, new GridConstraints(3, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        addRPCCheckBox = new JCheckBox();
+        addRPCCheckBox.setText(" RPC");
+        panel1.add(addRPCCheckBox, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return panel1;
     }
 }

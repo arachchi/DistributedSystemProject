@@ -2,6 +2,7 @@ package lk.ac.mrt.cse.system;
 
 import lk.ac.mrt.cse.system.model.Connection;
 
+import java.util.ArrayList;
 import java.util.Observer;
 
 /**
@@ -15,6 +16,8 @@ public interface Client{
     public String search(String keyword);
     public void addObserver(Observer observer);
     public String getConsoleMsg();
+    public String getStatus();
     public boolean registerToServer();
     public boolean unRegisterToServer();
+    public ArrayList<Connection> getConnectedNodes();
 }

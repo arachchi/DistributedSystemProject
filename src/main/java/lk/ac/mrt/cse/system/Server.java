@@ -1,6 +1,7 @@
 package lk.ac.mrt.cse.system;
 
-import lk.ac.mrt.cse.system.Client;
+import lk.ac.mrt.cse.system.model.Connection;
+import lk.ac.mrt.cse.util.ConnectionTable;
 
 import java.util.ArrayList;
 import java.util.Observer;
@@ -29,21 +30,21 @@ public interface Server extends Runnable {
 
     public String getClientConsoleMsg();
 
+    public String getSearchMsg();
+
+    public void setSearchMsg(String serachMsg);
+
+    public String getClientStatus();
+
     public boolean registerToServer();
 
     public ArrayList<String> getFileList();
-
-    public void setConsoleMsg(String consoleMsg);
 
     public Client getClient();
 
     public void setClient(Client client);
 
-    public int getBS_Port();
-
     public void setBS_Port(int BS_Port);
-
-    public String getBsIp();
 
     public void setBsIp(String bsIp);
 
@@ -51,14 +52,9 @@ public interface Server extends Runnable {
 
     public void setPort(String port);
 
-    public String getNodeIp();
-
-    public void setNodeIp(String nodeIp);
-
-    public String getUserName();
-
     public void setUserName(String userName);
 
-    public int getSize();
+    public void setConnectedNodesList(ArrayList<Connection> firstTwoNodes);
 
+    public ConnectionTable getRoutingTable();
 }

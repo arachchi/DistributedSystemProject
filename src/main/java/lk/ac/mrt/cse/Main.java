@@ -1,8 +1,10 @@
 package lk.ac.mrt.cse;
 
 import lk.ac.mrt.cse.gui.AddFile;
+import lk.ac.mrt.cse.rpc.impl.NodeServiceImpl;
 import lk.ac.mrt.cse.system.Server;
 import lk.ac.mrt.cse.system.imp.ServerImpl;
+import lk.ac.mrt.cse.util.ConnectionTable;
 import lk.ac.mrt.cse.util.Constants;
 
 import java.io.BufferedReader;
@@ -20,11 +22,16 @@ public class Main {
     private static ArrayList<String> totalFilesList = new ArrayList<String>();
     private static ArrayList<String> nodeFileList = new ArrayList<String>();
     private static Server server;
+    private static boolean rpc=false;
     public static void main(String args[]){
-
+        ConnectionTable routingTable=new ConnectionTable();
         initializeFiles();
-        server = new ServerImpl(nodeFileList);
-        AddFile addFile = new AddFile(server,totalFilesList,nodeFileList);
+        if(rpc)
+            server = new NodeServiceImpl(routingTable,nodeFileList);
+        else
+            server = new ServerImpl(routingTable,nodeFileList);
+
+        AddFile addFile = new AddFile(server,totalFilesList,nodeFileList,rpc);
         addFile.setVisible(true);
 
     }
